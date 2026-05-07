@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import type { PartialBlock } from "@blocknote/core";
-import { Lock, Unlock } from "lucide-react";
+import { Lock, Unlock, Clock } from "lucide-react";
 import { usePageStore } from "../store/pages";
 import { useSettingsStore } from "../store/settings";
+import { estimateReadingTime } from "../lib/readingTime";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { Cover } from "./Cover";
 import { TableOfContents } from "./TableOfContents";
@@ -69,9 +70,13 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
     calc();
     return editor.onChange(calc);
   }, [editor]);
+  const readingMins = estimateReadingTime(count);
   return (
-    <div className="text-xs text-gray-400 dark:text-neutral-600">
-      {count} {count === 1 ? "word" : "words"}
+    <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-neutral-600">
+      <span>{count} {count === 1 ? "word" : "words"}</span>
+      <span className="flex items-center gap-1">
+        <Clock size={10} /> {readingMins} min read
+      </span>
     </div>
   );
 }

@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tracker — Your thoughts, beautifully organised.</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --primary-glow: rgba(99,102,241,0.18);
+    --accent: #a78bfa;
+    --fg: #0f172a;
+    --fg-muted: #475569;
+    --fg-subtle: #94a3b8;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #f1f5f9;
+    --border: #e2e8f0;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(15,23,42,0.10);
+    --shadow-lg: 0 16px 64px rgba(15,23,42,0.14);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: var(--fg);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Progress bar ── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.45s cubic-bezier(0.4,0,0.2,1);
+    z-index: 1000;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ── Slide counter ── */
+  #counter {
+    position: fixed;
+    bottom: 20px; right: 28px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 0.04em;
+    z-index: 1000;
+  }
+
+  /* ── Navigation hints ── */
+  #nav-hint {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 0.05em;
+    z-index: 1000;
+  }
+
+  /* ── Arrow nav buttons ── */
+  .nav-btn {
+    position: fixed;
+    top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 18px;
+    transition: all 0.2s;
+    z-index: 999;
+    backdrop-filter: blur(8px);
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  #btn-prev { left: 18px; }
+  #btn-next { right: 18px; }
+
+  /* ── Slide container ── */
+  #deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1),
+                transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    transform: translateY(18px) scale(0.985);
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0) scale(1);
+  }
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.99);
+  }
+
+  /* ── Slide inner card ── */
+  .card {
+    background: var(--surface);
+    border-radius: 22px;
+    width: min(960px, calc(100vw - 80px));
+    min-height: min(580px, calc(100vh - 60px));
+    max-height: calc(100vh - 60px);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ── Slide number badge ── */
+  .slide-num {
+    position: absolute;
+    top: 22px; left: 28px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: var(--primary-glow);
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  /* ─────────────────────────────────────────
+     SLIDE 1 — HERO
+  ───────────────────────────────────────── */
+  .s1 .card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .s1 .hero-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 28px;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+  }
+  .s1 h1 {
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 18px;
+  }
+  .s1 h1 span {
+    background: linear-gradient(90deg, #a78bfa, #818cf8, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .s1 .tagline {
+    font-size: clamp(18px, 2.4vw, 26px);
+    color: rgba(255,255,255,0.82);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .s1 .subtitle {
+    font-size: clamp(13px, 1.5vw, 16px);
+    color: rgba(255,255,255,0.42);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .s1 .badge-row {
+    margin-top: 36px;
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  }
+  .s1 .badge {
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─────────────────────────────────────────
+     SLIDE 2 — THE PROBLEM
+  ───────────────────────────────────────── */
+  .s2 .card { background: var(--surface); }
+  .s2-inner { padding: 64px 72px; width: 100%; }
+  .slide-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--primary);
+    margin-bottom: 12px;
+  }
+  .s2 h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: var(--fg); letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 36px; }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .problem-card {
+    padding: 22px 20px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+  }
+  .problem-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #f87171, #fb923c);
+  }
+  .problem-card .icon { font-size: 26px; margin-bottom: 10px; }
+  .problem-card h3 { font-size: 15px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+  .problem-card p { font-size: 13px; color: var(--fg-muted); line-height: 1.55; }
+  .solution-banner {
+    padding: 18px 22px;
+    background: linear-gradient(90deg, var(--primary-glow), rgba(167,139,250,0.12));
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* ─────────────────────────────────────────
+     SLIDE 3 — INTRODUCING TRACKER
+  ───────────────────────────────────────── */
+  .s3 .card {
+    background: linear-gradient(150deg, #fafaf9 0%, #f5f3ff 100%);
+  }
+  .s3-inner { padding: 56px 72px; width: 100%; }
+  .s3 h2 { font-size: clamp(26px, 3.8vw, 42px); font-weight: 800; color: var(--fg); letter-spacing: -0.025em; margin-bottom: 8px; }
+  .s3 .lead { font-size: 16px; color: var(--fg-muted); margin-bottom: 40px; }
+  .pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+  .pillar {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+  }
+  .pillar .pill-icon { font-size: 28px; margin-bottom: 8px; }
+  .pillar h4 { font-size: 14px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .pillar p { font-size: 12px; color: var(--fg-muted); line-height: 1.5; }
+  .tech-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tech-chip {
+    padding: 5px 12px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* ─────────────────────────────────────────
+     SLIDE 4 — WRITE FREELY (Editor mockup)
+  ───────────────────────────────────────── */
+  .s4 .card { background: var(--surface); }
+  .s4-layout { display: flex; height: 100%; }
+  .s4-left { flex: 0 0 340px; padding: 56px 40px 40px; display: flex; flex-direction: column; justify-content: center; }
+  .s4-right { flex: 1; padding: 28px 24px 28px 0; display: flex; align-items: center; }
+
+  .s4 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 10px; }
+  .s4 .desc { font-size: 14px; color: var(--fg-muted); line-height: 1.65; margin-bottom: 24px; }
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .feature-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--fg-muted); font-weight: 500; }
+  .feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+
+  /* Editor mockup */
+  .editor-mock {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 100%;
+    max-height: 460px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.10);
+    font-family: system-ui, sans-serif;
+  }
+  .em-toolbar {
+    height: 38px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 4px; padding: 0 12px;
+  }
+  .em-tb-btn {
+    padding: 3px 7px; border-radius: 5px; font-size: 12px; font-weight: 700;
+    color: var(--fg-muted); cursor: default; transition: background 0.15s;
+  }
+  .em-tb-btn:hover { background: var(--surface-3); }
+  .em-sep { width: 1px; height: 16px; background: var(--border); margin: 0 3px; }
+  .em-body { padding: 18px 22px; }
+  .em-h1 { font-size: 22px; font-weight: 800; color: var(--fg); margin-bottom: 8px; }
+  .em-h2 { font-size: 16px; font-weight: 700; color: var(--fg); margin-bottom: 6px; margin-top: 14px; }
+  .em-p { font-size: 13px; color: var(--fg-muted); line-height: 1.6; margin-bottom: 8px; }
+  .em-bullet { display: flex; gap: 8px; font-size: 13px; color: var(--fg-muted); line-height: 1.55; margin-bottom: 4px; padding-left: 4px; }
+  .em-bullet::before { content: '•'; color: var(--primary); font-size: 15px; flex-shrink: 0; }
+  .em-todo { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--fg-muted); margin-bottom: 4px; padding-left: 4px; }
+  .em-checkbox { width: 14px; height: 14px; border: 1.5px solid var(--border); border-radius: 3px; flex-shrink: 0; }
+  .em-checkbox.done { background: var(--primary); border-color: var(--primary); display: flex; align-items: center; justify-content: center; }
+  .em-checkbox.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 800; }
+  .em-code { background: #f1f5f9; border-radius: 6px; padding: 8px 12px; font-family: 'SF Mono', monospace; font-size: 12px; color: #334155; margin: 6px 0; }
+  .em-quote { border-left: 3px solid var(--primary); padding: 4px 0 4px 12px; font-size: 13px; color: var(--fg-muted); font-style: italic; margin: 6px 0; }
+  .em-cursor { display: inline-block; width: 2px; height: 14px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ─────────────────────────────────────────
+     SLIDE 5 — ORGANISE EVERYTHING (Sidebar)
+  ───────────────────────────────────────── */
+  .s5 .card { background: var(--surface); }
+  .s5-layout { display: flex; height: 100%; }
+  .s5-left { flex: 1; padding: 56px 40px 40px; display: flex; flex-direction: column; justify-content: center; }
+  .s5-right { flex: 0 0 280px; padding: 20px 20px 20px 0; display: flex; align-items: center; }
+
+  .s5 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 10px; }
+  .s5 .desc { font-size: 14px; color: var(--fg-muted); line-height: 1.65; margin-bottom: 24px; }
+
+  /* Sidebar mockup */
+  .sidebar-mock {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.10);
+    font-size: 12.5px;
+  }
+  .sb-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    background: #fff;
+  }
+  .sb-workspace { font-size: 13px; font-weight: 700; color: var(--fg); }
+  .sb-search {
+    margin: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 12px; color: var(--fg-subtle);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sb-section { padding: 6px 10px 2px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-subtle); }
+  .sb-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin: 1px 6px;
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-size: 12.5px;
+    transition: background 0.12s;
+  }
+  .sb-item:hover, .sb-item.active { background: rgba(99,102,241,0.08); color: var(--primary); }
+  .sb-item .em { font-size: 14px; }
+  .sb-item .chevron { margin-left: auto; font-size: 10px; color: var(--fg-subtle); }
+  .sb-item.child { padding-left: 24px; }
+  .sb-item.child2 { padding-left: 38px; }
+  .sb-star { color: #f59e0b; font-size: 11px; }
+  .sb-divider { height: 1px; background: var(--border); margin: 6px 10px; }
+
+  /* ─────────────────────────────────────────
+     SLIDE 6 — KANBAN BOARD
+  ───────────────────────────────────────── */
+  .s6 .card { background: var(--surface-2); overflow: hidden; }
+  .s6-inner { padding: 44px 44px 36px; width: 100%; }
+  .s6 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 6px; }
+  .s6 .desc { font-size: 14px; color: var(--fg-muted); margin-bottom: 28px; }
+  .kanban-board { display: flex; gap: 14px; }
+  .kb-col {
+    flex: 1;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 10px;
+    min-height: 260px;
+  }
+  .kb-col-header {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 4px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .kb-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-todo { background: #94a3b8; }
+  .dot-progress { background: #f59e0b; }
+  .dot-done { background: #22c55e; }
+  .kb-count { margin-left: auto; background: var(--border); border-radius: 10px; padding: 1px 7px; font-size: 11px; color: var(--fg-muted); }
+  .kb-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(15,23,42,0.05);
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s;
+  }
+  .kb-card:hover { box-shadow: 0 4px 14px rgba(15,23,42,0.10); transform: translateY(-1px); }
+  .kb-card-title { font-size: 13px; font-weight: 600; color: var(--fg); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+  .kb-card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+  .kb-tag {
+    padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 600;
+  }
+  .tag-high { background: #fee2e2; color: #b91c1c; }
+  .tag-med { background: #fef9c3; color: #854d0e; }
+  .tag-low { background: #dcfce7; color: #15803d; }
+  .tag-custom { background: var(--primary-glow); color: var(--primary-dark); }
+
+  /* ─────────────────────────────────────────
+     SLIDE 7 — STAY FOCUSED
+  ───────────────────────────────────────── */
+  .s7 .card { background: var(--surface); }
+  .s7-inner { padding: 56px 72px; width: 100%; }
+  .s7 h2 { font-size: clamp(22px, 3vw, 38px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 8px; }
+  .s7 .desc { font-size: 14px; color: var(--fg-muted); margin-bottom: 36px; }
+  .focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .focus-feat {
+    padding: 24px 22px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .focus-feat .feat-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .focus-feat h4 { font-size: 14px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .focus-feat p { font-size: 12.5px; color: var(--fg-muted); line-height: 1.55; }
+
+  /* Zen mode mockup */
+  .zen-preview {
+    margin-top: 24px;
+    background: #0f172a;
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .zen-text h4 { font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .zen-text p { font-size: 12px; color: #64748b; }
+  .zen-stats { margin-left: auto; display: flex; gap: 16px; }
+  .zen-stat { text-align: center; }
+  .zen-stat .val { font-size: 20px; font-weight: 800; color: var(--primary-light); }
+  .zen-stat .lbl { font-size: 10px; color: #64748b; }
+
+  /* ─────────────────────────────────────────
+     SLIDE 8 — PROPERTIES & TAGS
+  ───────────────────────────────────────── */
+  .s8 .card { background: var(--surface); }
+  .s8-layout { display: flex; height: 100%; }
+  .s8-left { flex: 1; padding: 56px 40px 40px; display: flex; flex-direction: column; justify-content: center; }
+  .s8-right { flex: 0 0 320px; padding: 28px 28px 28px 0; display: flex; align-items: center; }
+
+  .s8 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 10px; }
+  .s8 .desc { font-size: 14px; color: var(--fg-muted); line-height: 1.65; margin-bottom: 28px; }
+
+  /* Properties panel mockup */
+  .props-mock {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    width: 100%;
+  }
+  .pm-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-subtle);
+    background: var(--surface-2);
+  }
+  .pm-row {
+    display: flex; align-items: center;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .pm-label { font-size: 12px; font-weight: 600; color: var(--fg-muted); width: 72px; flex-shrink: 0; }
+  .pm-value { font-size: 12px; color: var(--fg); display: flex; align-items: center; gap: 5px; }
+  .status-badge { padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .s-todo { background: #f1f5f9; color: #475569; }
+  .s-inprogress { background: #fef9c3; color: #854d0e; }
+  .s-done { background: #dcfce7; color: #15803d; }
+  .p-high { background: #fee2e2; color: #b91c1c; }
+  .p-med { background: #fef3c7; color: #92400e; }
+  .p-low { background: #dcfce7; color: #15803d; }
+  .pm-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .tag-browser {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .tb-title { font-size: 12px; font-weight: 700; color: var(--fg-muted); margin-bottom: 8px; }
+  .tb-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tb-tag { padding: 4px 10px; border-radius: 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+
+  /* ─────────────────────────────────────────
+     SLIDE 9 — TEMPLATES
+  ───────────────────────────────────────── */
+  .s9 .card { background: var(--surface-2); }
+  .s9-inner { padding: 48px 52px; width: 100%; }
+  .s9 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 6px; }
+  .s9 .desc { font-size: 14px; color: var(--fg-muted); margin-bottom: 28px; }
+  .template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .tmpl-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .tmpl-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .tmpl-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.10); transform: translateY(-2px); }
+  .tmpl-card:hover::after { opacity: 1; }
+  .tmpl-emoji { font-size: 28px; margin-bottom: 10px; }
+  .tmpl-name { font-size: 14px; font-weight: 700; color: var(--fg); margin-bottom: 5px; }
+  .tmpl-desc { font-size: 12px; color: var(--fg-muted); line-height: 1.5; }
+
+  /* ─────────────────────────────────────────
+     SLIDE 10 — YOUR DATA, YOUR RULES
+  ───────────────────────────────────────── */
+  .s10 .card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  }
+  .s10-inner { padding: 60px 72px; width: 100%; }
+  .s10 h2 { font-size: clamp(24px, 3.5vw, 42px); font-weight: 800; letter-spacing: -0.025em; color: #fff; margin-bottom: 8px; }
+  .s10 .desc { font-size: 15px; color: rgba(255,255,255,0.55); margin-bottom: 40px; }
+  .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .priv-item {
+    padding: 22px 20px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--radius);
+    display: flex; gap: 14px;
+  }
+  .priv-icon { font-size: 24px; flex-shrink: 0; }
+  .priv-item h4 { font-size: 14px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .priv-item p { font-size: 12.5px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+  .export-demo {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+  .md-key { color: #818cf8; }
+  .md-val { color: #a5f3fc; }
+  .md-head { color: #f0abfc; font-weight: 700; }
+  .md-text { color: #cbd5e1; }
+
+  /* ─────────────────────────────────────────
+     SLIDE 11 — KEYBOARD SHORTCUTS
+  ───────────────────────────────────────── */
+  .s11 .card { background: var(--surface); }
+  .s11-inner { padding: 52px 64px; width: 100%; }
+  .s11 h2 { font-size: clamp(22px, 3vw, 36px); font-weight: 800; letter-spacing: -0.025em; color: var(--fg); margin-bottom: 6px; }
+  .s11 .desc { font-size: 14px; color: var(--fg-muted); margin-bottom: 28px; }
+  .kbd-table { width: 100%; border-collapse: collapse; }
+  .kbd-table th {
+    text-align: left; padding: 8px 14px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--fg-subtle); background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .kbd-table td {
+    padding: 9px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg-muted);
+    vertical-align: middle;
+  }
+  .kbd-table tr:last-child td { border-bottom: none; }
+  .kbd-table tr:hover td { background: var(--surface-2); }
+  kbd {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 2px 7px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid #cbd5e1;
+    border-radius: 5px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .kbd-desc { font-weight: 500; color: var(--fg); }
+
+  /* ─────────────────────────────────────────
+     SLIDE 12 — GET STARTED
+  ───────────────────────────────────────── */
+  .s12 .card {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 60%, #ddd6fe 100%);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .s12-inner { padding: 60px 72px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .s12 h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; color: var(--fg); margin-bottom: 8px; }
+  .s12 .sub { font-size: 16px; color: var(--fg-muted); margin-bottom: 40px; }
+  .steps { display: flex; gap: 0; margin-bottom: 40px; position: relative; }
+  .steps::before {
+    content: '';
+    position: absolute; top: 28px; left: 60px; right: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    z-index: 0;
+  }
+  .step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; }
+  .step-num {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: #fff;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+    border: 3px solid #fff;
+  }
+  .step h4 { font-size: 14px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .step p { font-size: 12px; color: var(--fg-muted); max-width: 140px; }
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border-radius: 12px;
+    font-size: 16px; font-weight: 700;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.40);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(99,102,241,0.50); }
+  .cta-url {
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* ── Shared utility ── */
+  .gradient-text {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="counter">1 / 12</div>
+<div id="nav-hint">← → to navigate · Space to advance</div>
+
+<button class="nav-btn" id="btn-prev" aria-label="Previous slide">&#8592;</button>
+<button class="nav-btn" id="btn-next" aria-label="Next slide">&#8594;</button>
+
+<div id="deck">
+
+  <!-- ══════════════════════════════════════
+       SLIDE 1 — HERO
+  ══════════════════════════════════════ -->
+  <div class="slide s1 active" data-slide="1">
+    <div class="card">
+      <div class="hero-icon">📝</div>
+      <h1><span>Tracker</span></h1>
+      <p class="tagline">Your thoughts, beautifully organised.</p>
+      <p class="subtitle">A powerful Notion-style workspace that lives entirely in your browser. No account. No cloud. No limits.</p>
+      <div class="badge-row">
+        <span class="badge">🔒 Offline-first</span>
+        <span class="badge">⚡ Instant</span>
+        <span class="badge">🎨 Beautiful</span>
+        <span class="badge">🧩 Block editor</span>
+        <span class="badge">🗂 Nested pages</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 2 — THE PROBLEM
+  ══════════════════════════════════════ -->
+  <div class="slide s2" data-slide="2">
+    <div class="card">
+      <div class="s2-inner">
+        <div class="slide-label">The Problem</div>
+        <h2>Note-taking is<br/>broken for most people.</h2>
+        <div class="problem-grid">
+          <div class="problem-card">
+            <div class="icon">🏗️</div>
+            <h3>Too complex</h3>
+            <p>Notion requires sign-up, cloud sync, and a billing plan. You just want to write.</p>
+          </div>
+          <div class="problem-card">
+            <div class="icon">📋</div>
+            <h3>Too simple</h3>
+            <p>Basic notepads can't handle nested pages, rich formatting, or visual organisation.</p>
+          </div>
+          <div class="problem-card">
+            <div class="icon">☁️</div>
+            <h3>Not private</h3>
+            <p>Every keystroke syncs to a server somewhere. Your notes aren't really yours.</p>
+          </div>
+        </div>
+        <div class="solution-banner">
+          <span>✨</span>
+          There had to be a better way — powerful but private, beautiful but instant.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 3 — INTRODUCING TRACKER
+  ══════════════════════════════════════ -->
+  <div class="slide s3" data-slide="3">
+    <div class="card">
+      <div class="s3-inner">
+        <div class="slide-label">Introducing Tracker</div>
+        <h2>Your personal knowledge base.<br/><span class="gradient-text">No account. No cloud. No latency.</span></h2>
+        <p class="lead">Runs entirely in your browser at localhost:5173. Everything stored in localStorage — instant, private, always available.</p>
+        <div class="pillars">
+          <div class="pillar">
+            <div class="pill-icon">⚡</div>
+            <h4>Instant</h4>
+            <p>Zero load time. Open and start writing immediately.</p>
+          </div>
+          <div class="pillar">
+            <div class="pill-icon">🔒</div>
+            <h4>Private</h4>
+            <p>Data never leaves your machine. Ever.</p>
+          </div>
+          <div class="pillar">
+            <div class="pill-icon">📶</div>
+            <h4>Offline</h4>
+            <p>Works without internet. Always.</p>
+          </div>
+          <div class="pillar">
+            <div class="pill-icon">🆓</div>
+            <h4>Free</h4>
+            <p>No subscriptions, no paywalls, no limits.</p>
+          </div>
+        </div>
+        <div class="tech-row">
+          <span class="tech-chip">React</span>
+          <span class="tech-chip">BlockNote</span>
+          <span class="tech-chip">Zustand</span>
+          <span class="tech-chip">Tailwind CSS</span>
+          <span class="tech-chip">localStorage</span>
+          <span class="tech-chip">Vite</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 4 — WRITE FREELY
+  ══════════════════════════════════════ -->
+  <div class="slide s4" data-slide="4">
+    <div class="card">
+      <div class="s4-layout">
+        <div class="s4-left">
+          <div class="slide-label">Write Freely</div>
+          <h2>A block editor<br/>that gets out<br/>of your way.</h2>
+          <p class="desc">Type <code style="background:var(--surface-3);padding:2px 5px;border-radius:4px;font-size:12px;">/</code> to summon any block. Slash commands, drag-to-reorder, inline formatting — everything at your fingertips.</p>
+          <ul class="feature-list">
+            <li>Headings, paragraphs, bullets, numbered lists</li>
+            <li>Todos with checkboxes</li>
+            <li>Code blocks with syntax highlighting</li>
+            <li>Blockquotes, tables, toggles</li>
+            <li>Auto-save on every keystroke</li>
+            <li>Bold, italic, underline, inline code</li>
+          </ul>
+        </div>
+        <div class="s4-right">
+          <div class="editor-mock">
+            <div class="em-toolbar">
+              <span class="em-tb-btn">B</span>
+              <span class="em-tb-btn"><em>I</em></span>
+              <span class="em-tb-btn"><u>U</u></span>
+              <div class="em-sep"></div>
+              <span class="em-tb-btn">H1</span>
+              <span class="em-tb-btn">H2</span>
+              <div class="em-sep"></div>
+              <span class="em-tb-btn">≡</span>
+              <span class="em-tb-btn">1.</span>
+              <span class="em-tb-btn">☑</span>
+              <div class="em-sep"></div>
+              <span class="em-tb-btn">&lt;/&gt;</span>
+              <span class="em-tb-btn">❝</span>
+            </div>
+            <div class="em-body">
+              <div class="em-h1">🚀 Q4 Project Plan</div>
+              <div class="em-p">Outline for the upcoming product sprint.</div>
+              <div class="em-h2">Goals</div>
+              <div class="em-bullet">Ship Kanban board view to all users</div>
+              <div class="em-bullet">Improve onboarding with templates</div>
+              <div class="em-bullet">Performance audit — target &lt; 100ms TTI</div>
+              <div class="em-h2">Tasks</div>
+              <div class="em-todo"><div class="em-checkbox done"></div> Design system update</div>
+              <div class="em-todo"><div class="em-checkbox done"></div> API rate limiting</div>
+              <div class="em-todo"><div class="em-checkbox"></div> User testing sessions<span class="em-cursor"></span></div>
+              <div class="em-code">// Auto-saved · 247 words · ~1 min read</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 5 — ORGANISE EVERYTHING
+  ══════════════════════════════════════ -->
+  <div class="slide s5" data-slide="5">
+    <div class="card">
+      <div class="s5-layout">
+        <div class="s5-left">
+          <div class="slide-label">Organise Everything</div>
+          <h2>Infinite hierarchy,<br/>zero friction.</h2>
+          <p class="desc">Nest pages inside pages, collapse branches, star favourites, and jump anywhere with Cmd+K. The sidebar adapts to your mind.</p>
+          <ul class="feature-list">
+            <li>Infinite nested pages</li>
+            <li>Collapsible sidebar tree</li>
+            <li>Favorites pinned at top</li>
+            <li>Recent pages — last 5 visited</li>
+            <li>Breadcrumbs always visible</li>
+            <li>Cmd+K instant search</li>
+            <li>Resizable sidebar panel</li>
+          </ul>
+        </div>
+        <div class="s5-right">
+          <div class="sidebar-mock">
+            <div class="sb-header">
+              <span style="font-size:18px">📝</span>
+              <span class="sb-workspace">My Workspace</span>
+            </div>
+            <div class="sb-search">
+              <span>🔍</span> Search pages…
+            </div>
+            <div class="sb-section">Favorites</div>
+            <div class="sb-item active">
+              <span class="em">⭐</span> Weekly Review
+              <span class="sb-star">★</span>
+              <span class="chevron">›</span>
+            </div>
+            <div class="sb-item">
+              <span class="em">📊</span> Q4 Project Plan
+              <span class="sb-star">★</span>
+              <span class="chevron">›</span>
+            </div>
+            <div class="sb-divider"></div>
+            <div class="sb-section">Pages</div>
+            <div class="sb-item">
+              <span class="em">📁</span> Work
+              <span class="chevron">▾</span>
+            </div>
+            <div class="sb-item child">
+              <span class="em">📋</span> Meeting Notes
+              <span class="chevron">▾</span>
+            </div>
+            <div class="sb-item child2">
+              <span class="em">📝</span> 2024-01-15
+            </div>
+            <div class="sb-item child2">
+              <span class="em">📝</span> 2024-01-22
+            </div>
+            <div class="sb-item child">
+              <span class="em">🐛</span> Bug Reports
+            </div>
+            <div class="sb-item">
+              <span class="em">📚</span> Reading List
+              <span class="chevron">›</span>
+            </div>
+            <div class="sb-item">
+              <span class="em">📔</span> Daily Journal
+              <span class="chevron">›</span>
+            </div>
+            <div class="sb-divider"></div>
+            <div class="sb-section">Recent</div>
+            <div class="sb-item">
+              <span class="em">🕐</span> Bug Report #42
+            </div>
+            <div class="sb-item">
+              <span class="em">🕐</span> Team Standup
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 6 — KANBAN BOARD
+  ══════════════════════════════════════ -->
+  <div class="slide s6" data-slide="6">
+    <div class="card">
+      <div class="s6-inner">
+        <div class="slide-label">See the Big Picture</div>
+        <h2>Kanban board view.</h2>
+        <p class="desc">Every page becomes a card. Drag across columns. Filter by tag. Perfect for projects, sprints, and ideas.</p>
+        <div class="kanban-board">
+          <div class="kb-col">
+            <div class="kb-col-header">
+              <div class="kb-dot dot-todo"></div>
+              Todo
+              <span class="kb-count">3</span>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">📝 API Documentation</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-med">Medium</span>
+                <span class="kb-tag tag-custom">docs</span>
+              </div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">🎨 Design System v2</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-high">High</span>
+                <span class="kb-tag tag-custom">design</span>
+              </div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">🔐 Auth Refactor</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-low">Low</span>
+              </div>
+            </div>
+          </div>
+          <div class="kb-col">
+            <div class="kb-col-header">
+              <div class="kb-dot dot-progress"></div>
+              In Progress
+              <span class="kb-count">2</span>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">📊 Kanban Board</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-high">High</span>
+                <span class="kb-tag tag-custom">feature</span>
+              </div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">⚡ Performance Audit</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-med">Medium</span>
+                <span class="kb-tag tag-custom">infra</span>
+              </div>
+            </div>
+          </div>
+          <div class="kb-col">
+            <div class="kb-col-header">
+              <div class="kb-dot dot-done"></div>
+              Done
+              <span class="kb-count">4</span>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">✅ Block Editor MVP</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-custom">editor</span>
+              </div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">✅ Dark Mode</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-custom">ui</span>
+              </div>
+            </div>
+            <div class="kb-card">
+              <div class="kb-card-title">✅ Nested Pages</div>
+              <div class="kb-card-meta">
+                <span class="kb-tag tag-custom">core</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 7 — STAY FOCUSED
+  ══════════════════════════════════════ -->
+  <div class="slide s7" data-slide="7">
+    <div class="card">
+      <div class="s7-inner">
+        <div class="slide-label">Stay Focused</div>
+        <h2>Write without distraction.<br/><span class="gradient-text">Know your progress.</span></h2>
+        <p class="desc">Tracker gets out of your way when you need to think, and surfaces the right information exactly when you need it.</p>
+        <div class="focus-grid">
+          <div class="focus-feat">
+            <div class="feat-icon">🧘</div>
+            <div>
+              <h4>Focus / Zen Mode</h4>
+              <p>Full-screen distraction-free writing. UI disappears, only your words remain.</p>
+            </div>
+          </div>
+          <div class="focus-feat">
+            <div class="feat-icon">🔒</div>
+            <div>
+              <h4>Page Lock</h4>
+              <p>Mark any page read-only to prevent accidental edits. Unlock with one click.</p>
+            </div>
+          </div>
+          <div class="focus-feat">
+            <div class="feat-icon">📑</div>
+            <div>
+              <h4>Table of Contents</h4>
+              <p>Auto-generated from headings in the right panel. Click to jump to any section.</p>
+            </div>
+          </div>
+          <div class="focus-feat">
+            <div class="feat-icon">⏱️</div>
+            <div>
+              <h4>Reading Time Estimate</h4>
+              <p>Know how long your content takes to read. Shown live in the editor footer.</p>
+            </div>
+          </div>
+        </div>
+        <div class="zen-preview">
+          <span style="font-size:24px">🧘</span>
+          <div class="zen-text">
+            <h4>Zen Mode — Active</h4>
+            <p>Press Cmd+Shift+F to toggle · Esc to exit</p>
+          </div>
+          <div class="zen-stats">
+            <div class="zen-stat"><div class="val">247</div><div class="lbl">words</div></div>
+            <div class="zen-stat"><div class="val">~1</div><div class="lbl">min read</div></div>
+            <div class="zen-stat"><div class="val">4</div><div class="lbl">headings</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 8 — PROPERTIES & TAGS
+  ══════════════════════════════════════ -->
+  <div class="slide s8" data-slide="8">
+    <div class="card">
+      <div class="s8-layout">
+        <div class="s8-left">
+          <div class="slide-label">Properties &amp; Tags</div>
+          <h2>Your knowledge base,<br/>structured your way.</h2>
+          <p class="desc">Add status, priority, and custom tags to every page. Filter, sort, and browse your entire library by any dimension.</p>
+          <ul class="feature-list">
+            <li>Status: Todo / In Progress / Done</li>
+            <li>Priority: Low / Medium / High</li>
+            <li>Custom tags — create any label</li>
+            <li>Tag browser to filter pages</li>
+            <li>Properties visible in editor header</li>
+          </ul>
+          <div class="tag-browser" style="margin-top:20px;">
+            <div class="tb-title">Tag Browser</div>
+            <div class="tb-tags">
+              <span class="tb-tag" style="background:#ede9fe;color:#7c3aed">work</span>
+              <span class="tb-tag" style="background:#dcfce7;color:#15803d">personal</span>
+              <span class="tb-tag" style="background:#fef9c3;color:#854d0e">ideas</span>
+              <span class="tb-tag" style="background:#fee2e2;color:#b91c1c">urgent</span>
+              <span class="tb-tag" style="background:#e0f2fe;color:#0369a1">research</span>
+              <span class="tb-tag" style="background:#fce7f3;color:#9d174d">design</span>
+            </div>
+          </div>
+        </div>
+        <div class="s8-right">
+          <div class="props-mock">
+            <div class="pm-header">Page Properties</div>
+            <div class="pm-row">
+              <span class="pm-label">Status</span>
+              <span class="pm-value"><span class="status-badge s-inprogress">⏳ In Progress</span></span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-label">Priority</span>
+              <span class="pm-value"><span class="status-badge p-high">🔴 High</span></span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-label">Tags</span>
+              <span class="pm-value">
+                <div class="pm-tags">
+                  <span class="kb-tag tag-custom">work</span>
+                  <span class="kb-tag tag-custom">q4</span>
+                  <span class="kb-tag tag-custom">sprint</span>
+                </div>
+              </span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-label">Icon</span>
+              <span class="pm-value" style="font-size:18px">📊</span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-label">Cover</span>
+              <span class="pm-value">
+                <div style="width:100px;height:16px;border-radius:4px;background:linear-gradient(90deg,#6366f1,#a78bfa);"></div>
+              </span>
+            </div>
+            <div class="pm-row">
+              <span class="pm-label">Locked</span>
+              <span class="pm-value" style="font-size:12px;color:#22c55e;font-weight:700">🔓 Unlocked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 9 — TEMPLATES
+  ══════════════════════════════════════ -->
+  <div class="slide s9" data-slide="9">
+    <div class="card">
+      <div class="s9-inner">
+        <div class="slide-label">Start Fast</div>
+        <h2>6 beautiful templates.<br/>Zero blank-page anxiety.</h2>
+        <p class="desc">Pick a template and your page is pre-structured with the right headings, sections, and prompts — ready to fill in.</p>
+        <div class="template-grid">
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">📅</div>
+            <div class="tmpl-name">Meeting Notes</div>
+            <div class="tmpl-desc">Agenda, attendees, action items, decisions. Never leave a meeting without a summary.</div>
+          </div>
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">📔</div>
+            <div class="tmpl-name">Daily Journal</div>
+            <div class="tmpl-desc">Morning intentions, gratitude, day log, evening reflection. Build a journaling habit.</div>
+          </div>
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">📊</div>
+            <div class="tmpl-name">Project Plan</div>
+            <div class="tmpl-desc">Goals, milestones, tasks, risks, and stakeholders. Keep every project on track.</div>
+          </div>
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">🐛</div>
+            <div class="tmpl-name">Bug Report</div>
+            <div class="tmpl-desc">Steps to reproduce, expected vs actual, environment, and screenshots section.</div>
+          </div>
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">📚</div>
+            <div class="tmpl-name">Reading List</div>
+            <div class="tmpl-desc">Books to read, currently reading, key takeaways, and rating column.</div>
+          </div>
+          <div class="tmpl-card">
+            <div class="tmpl-emoji">🗓️</div>
+            <div class="tmpl-name">Weekly Review</div>
+            <div class="tmpl-desc">Wins, learnings, blockers, next-week priorities. End each week intentionally.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 10 — YOUR DATA, YOUR RULES
+  ══════════════════════════════════════ -->
+  <div class="slide s10" data-slide="10">
+    <div class="card">
+      <div class="s10-inner">
+        <div class="slide-label" style="color:var(--accent)">Your Data, Your Rules</div>
+        <h2>Offline-first.<br/>No vendor lock-in.</h2>
+        <p class="desc">Your notes are yours — stored locally, exportable anytime, readable forever as Markdown.</p>
+        <div class="privacy-grid">
+          <div class="priv-item">
+            <div class="priv-icon">💾</div>
+            <div>
+              <h4>localStorage persistence</h4>
+              <p>Everything saved instantly to your browser's local storage. No network request. Ever.</p>
+            </div>
+          </div>
+          <div class="priv-item">
+            <div class="priv-icon">📤</div>
+            <div>
+              <h4>Export as Markdown</h4>
+              <p>Download any page as a .md file. Open in any editor, migrate anywhere, anytime.</p>
+            </div>
+          </div>
+          <div class="priv-item">
+            <div class="priv-icon">🔌</div>
+            <div>
+              <h4>Works offline</h4>
+              <p>No internet? No problem. Tracker is a local-first app — works on flights, in the woods, everywhere.</p>
+            </div>
+          </div>
+          <div class="priv-item">
+            <div class="priv-icon">🔓</div>
+            <div>
+              <h4>Open format</h4>
+              <p>Markdown is a universal standard. Your data outlives any app.</p>
+            </div>
+          </div>
+        </div>
+        <div class="export-demo">
+          <span class="md-key">---</span><br/>
+          <span class="md-key">title:</span> <span class="md-val">Q4 Project Plan</span><br/>
+          <span class="md-key">status:</span> <span class="md-val">In Progress</span> &nbsp;
+          <span class="md-key">priority:</span> <span class="md-val">High</span><br/>
+          <span class="md-key">tags:</span> <span class="md-val">[work, q4, sprint]</span><br/>
+          <span class="md-key">---</span><br/>
+          <span class="md-head"># Q4 Project Plan</span><br/>
+          <span class="md-text">Outline for the upcoming product sprint...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 11 — KEYBOARD SHORTCUTS
+  ══════════════════════════════════════ -->
+  <div class="slide s11" data-slide="11">
+    <div class="card">
+      <div class="s11-inner">
+        <div class="slide-label">Keyboard-First</div>
+        <h2>Everything has a shortcut.</h2>
+        <p class="desc">Power users live on the keyboard. Tracker is built for you.</p>
+        <table class="kbd-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Shortcut</th>
+              <th>Action</th>
+              <th>Shortcut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="kbd-desc">Command palette / Search</td>
+              <td><kbd>⌘</kbd> <kbd>K</kbd></td>
+              <td class="kbd-desc">New page</td>
+              <td><kbd>⌘</kbd> <kbd>N</kbd></td>
+            </tr>
+            <tr>
+              <td class="kbd-desc">Toggle dark mode</td>
+              <td><kbd>⌘</kbd> <kbd>Shift</kbd> <kbd>D</kbd></td>
+              <td class="kbd-desc">Focus / Zen mode</td>
+              <td><kbd>⌘</kbd> <kbd>Shift</kbd> <kbd>F</kbd></td>
+            </tr>
+            <tr>
+              <td class="kbd-desc">Toggle table of contents</td>
+              <td><kbd>⌘</kbd> <kbd>Shift</kbd> <kbd>T</kbd></td>
+              <td class="kbd-desc">Bold text</td>
+              <td><kbd>⌘</kbd> <kbd>B</kbd></td>
+            </tr>
+            <tr>
+              <td class="kbd-desc">Italic text</td>
+              <td><kbd>⌘</kbd> <kbd>I</kbd></td>
+              <td class="kbd-desc">Underline text</td>
+              <td><kbd>⌘</kbd> <kbd>U</kbd></td>
+            </tr>
+            <tr>
+              <td class="kbd-desc">Slash command menu</td>
+              <td><kbd>/</kbd></td>
+              <td class="kbd-desc">Quick capture note</td>
+              <td><kbd>⌘</kbd> <kbd>Shift</kbd> <kbd>C</kbd></td>
+            </tr>
+            <tr>
+              <td class="kbd-desc">Navigate slides</td>
+              <td><kbd>←</kbd> <kbd>→</kbd></td>
+              <td class="kbd-desc">Advance slide</td>
+              <td><kbd>Space</kbd></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 12 — GET STARTED
+  ══════════════════════════════════════ -->
+  <div class="slide s12" data-slide="12">
+    <div class="card">
+      <div class="s12-inner">
+        <div class="slide-label" style="color:var(--primary)">Get Started</div>
+        <h2>Start writing in<br/><span class="gradient-text">10 seconds.</span></h2>
+        <p class="sub">No account. No download. Just open your browser and go.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h4>Open Tracker</h4>
+            <p>Navigate to localhost:5173 in any browser</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h4>Create a page</h4>
+            <p>Hit Cmd+N or click New Page in the sidebar</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h4>Pick a template</h4>
+            <p>Or start blank — type / for block options</p>
+          </div>
+        </div>
+        <div class="cta-btn">
+          ✍️ &nbsp; Open Tracker &nbsp; →
+        </div>
+        <div class="cta-url">localhost:5173</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#deck -->
+
+<script>
+  const TOTAL = 12;
+  let current = 1;
+  let isAnimating = false;
+
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progress-bar');
+  const counter = document.getElementById('counter');
+
+  function updateProgress() {
+    const pct = ((current - 1) / (TOTAL - 1)) * 100;
+    progressBar.style.width = pct + '%';
+    counter.textContent = current + ' / ' + TOTAL;
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > TOTAL || n === current || isAnimating) return;
+    isAnimating = true;
+
+    const prevSlide = document.querySelector('.slide.active');
+    const nextSlide = document.querySelector('[data-slide="' + n + '"]');
+
+    prevSlide.classList.add('exit-left');
+    prevSlide.classList.remove('active');
+
+    // slight delay so exit starts first
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        nextSlide.classList.add('active');
+      });
+    });
+
+    current = n;
+    updateProgress();
+
+    setTimeout(() => {
+      prevSlide.classList.remove('exit-left');
+      isAnimating = false;
+    }, 560);
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  document.getElementById('btn-next').addEventListener('click', next);
+  document.getElementById('btn-prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); prev();
+    } else if (e.key >= '1' && e.key <= '9') {
+      goTo(parseInt(e.key));
+    }
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+  });
+
+  // Initialise
+  updateProgress();
+</script>
+</body>
+</html>

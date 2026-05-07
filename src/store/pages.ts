@@ -42,6 +42,9 @@ interface PageStore {
 
   // Favorites
   toggleFavorite: (id: string) => void;
+
+  // Derived / selectors
+  getAllTags: () => string[];
 }
 
 function newPage(overrides?: Partial<Page>): Page {
@@ -242,6 +245,13 @@ export const usePageStore = create<PageStore>()(
         set((state) => ({
           pages: { ...state.pages, [id]: { ...state.pages[id], favorited: !state.pages[id].favorited } },
         })),
+
+      getAllTags: () => {
+        const { pages } = usePageStore.getState();
+        const tagSet = new Set<string>();
+        Object.values(pages).filter((p) => !p.deleted).forEach((p) => p.tags.forEach((t) => tagSet.add(t)));
+        return Array.from(tagSet).sort();
+      },
     }),
     {
       name: "notion-clone-pages",
