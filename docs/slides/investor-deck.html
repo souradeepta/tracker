@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tracker — Investor Deck · Seed Round · May 2026</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; }
+
+  /* ─── CSS Variables ─────────────────────────────────────────────────────── */
+  :root {
+    --navy:    #0f172a;
+    --navy2:   #1e293b;
+    --navy3:   #334155;
+    --blue:    #3b82f6;
+    --blue-l:  #60a5fa;
+    --green:   #10b981;
+    --green-l: #34d399;
+    --amber:   #f59e0b;
+    --red:     #ef4444;
+    --white:   #f8fafc;
+    --muted:   #94a3b8;
+    --border:  #1e293b;
+    --slide-w: 1280px;
+    --slide-h: 720px;
+  }
+
+  /* ─── Viewport Scaler ────────────────────────────────────────────────────── */
+  #scaler {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #07111f;
+  }
+  #deck-wrap {
+    position: relative;
+    width: var(--slide-w);
+    height: var(--slide-h);
+    transform-origin: center center;
+  }
+
+  /* ─── Slides ────────────────────────────────────────────────────────────── */
+  .slide {
+    position: absolute; inset: 0;
+    width: var(--slide-w);
+    height: var(--slide-h);
+    overflow: hidden;
+    display: none;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+  .slide.fade-in { animation: fadeIn .45s ease forwards; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ─── Watermark ─────────────────────────────────────────────────────────── */
+  .slide::before {
+    content: "CONFIDENTIAL";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: 14px;
+    color: rgba(255,255,255,0.06);
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Dark slide variant */
+  .slide.dark { background: var(--navy); color: var(--white); }
+  /* Light slide variant */
+  .slide.light { background: #f8fafc; color: var(--navy); }
+  .slide.light::before { color: rgba(15,23,42,0.05); }
+
+  /* ─── Progress Bar ─────────────────────────────────────────────────────── */
+  #progress-bar {
+    position: fixed; bottom: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    transition: width .3s ease;
+    z-index: 100;
+  }
+  #slide-counter {
+    position: fixed; bottom: 12px; right: 20px;
+    font-size: 12px; color: rgba(255,255,255,0.4);
+    letter-spacing: 1px; z-index: 100;
+    font-variant-numeric: tabular-nums;
+  }
+  #nav-hint {
+    position: fixed; bottom: 12px; left: 20px;
+    font-size: 12px; color: rgba(255,255,255,0.35);
+    letter-spacing: .5px; z-index: 100;
+  }
+
+  /* ─── Logo ──────────────────────────────────────────────────────────────── */
+  .logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    background: var(--blue);
+    border-radius: 8px;
+    font-size: 20px; font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+  }
+  .logo-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-wordmark {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.5px;
+  }
+
+  /* ─── Shared Layout Helpers ─────────────────────────────────────────────── */
+  .slide-inner {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 56px 72px 48px;
+  }
+  .slide-header {
+    margin-bottom: 36px;
+  }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--blue);
+    margin-bottom: 8px;
+  }
+  .slide-title {
+    font-size: 38px; font-weight: 800; letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+  .slide-title span { color: var(--blue); }
+  .light .eyebrow { color: var(--blue); }
+  .light .slide-title { color: var(--navy); }
+
+  /* Grid helpers */
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+  /* Card */
+  .card {
+    background: var(--navy2);
+    border: 1px solid var(--navy3);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .card.accent-top { border-top: 3px solid var(--blue); }
+  .card.accent-green { border-top: 3px solid var(--green); }
+  .light .card { background: white; border-color: #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 1 — Cover
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-1 {
+    background: linear-gradient(135deg, #0f172a 0%, #0d1f3c 60%, #0b2347 100%);
+    align-items: center; justify-content: center; text-align: center;
+    flex-direction: column;
+  }
+  #slide-1 .cover-logo {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; font-weight: 900; color: white;
+    margin: 0 auto 28px;
+    box-shadow: 0 0 60px rgba(59,130,246,.45);
+  }
+  #slide-1 h1 {
+    font-size: 96px; font-weight: 900; letter-spacing: -4px;
+    color: white; line-height: 1;
+    background: linear-gradient(135deg, #ffffff 30%, #60a5fa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #slide-1 .tagline {
+    font-size: 22px; color: #94a3b8; margin-top: 16px; font-weight: 400;
+    letter-spacing: 0.2px;
+  }
+  #slide-1 .meta {
+    margin-top: 48px; display: flex; align-items: center; gap: 24px;
+    justify-content: center;
+  }
+  #slide-1 .badge {
+    padding: 8px 20px; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: 13px; color: rgba(255,255,255,.6); letter-spacing: 1px;
+    font-weight: 500;
+  }
+  #slide-1 .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.2); }
+  #slide-1 .glow-line {
+    width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    margin: 24px auto;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 2 — Problem
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-2 { background: var(--navy); }
+  .problem-card {
+    background: linear-gradient(135deg, #1e293b, #162032);
+    border: 1px solid #2d3f55;
+    border-radius: 16px;
+    padding: 32px 28px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+  }
+  .problem-card .stat {
+    font-size: 52px; font-weight: 900; letter-spacing: -2px;
+    line-height: 1;
+  }
+  .problem-card .stat.red { color: #ef4444; }
+  .problem-card .stat.amber { color: #f59e0b; }
+  .problem-card .stat.blue { color: var(--blue); }
+  .problem-card .label {
+    font-size: 16px; color: var(--white); font-weight: 600; line-height: 1.4;
+  }
+  .problem-card .source { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 3 — Market
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-3 { background: var(--navy); }
+  .market-circles {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: 40px; flex: 1;
+  }
+  .market-circle-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .market-circle {
+    border-radius: 50%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-weight: 800;
+  }
+  .market-circle .amt { font-size: 28px; letter-spacing: -1px; }
+  .market-circle .lbl { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .7; }
+  .market-circle-wrap .desc { font-size: 13px; color: var(--muted); text-align: center; max-width: 180px; line-height: 1.5; }
+  .market-circle-wrap .tag { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 4 — Solution
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-4 { background: var(--navy); }
+  .solution-card {
+    background: linear-gradient(145deg, #1e293b, #151f2e);
+    border: 1px solid #2d3f55;
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform .2s;
+  }
+  .solution-icon { font-size: 32px; }
+  .solution-card h3 { font-size: 20px; font-weight: 800; color: white; }
+  .solution-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .solution-card .highlight { font-size: 13px; font-weight: 700; color: var(--green); }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 5 — Product Demo (CSS mockup)
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-5 {
+    background: linear-gradient(135deg, #0f172a 0%, #0d1b2e 100%);
+    align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .demo-container {
+    width: 1080px; height: 580px;
+    background: #0f172a;
+    border-radius: 16px;
+    border: 1px solid #1e293b;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04);
+  }
+  /* title bar */
+  .demo-titlebar {
+    background: #0d1525;
+    border-bottom: 1px solid #1e293b;
+    padding: 0 16px;
+    height: 36px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .demo-url {
+    flex: 1; background: #1e293b; border-radius: 5px;
+    height: 20px; margin: 0 12px;
+    display: flex; align-items: center; padding: 0 10px;
+    font-size: 11px; color: #475569;
+  }
+  /* sidebar */
+  .demo-sidebar {
+    width: 220px; min-width: 220px;
+    background: #111827;
+    border-right: 1px solid #1e293b;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .demo-sidebar-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid #1e293b;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .demo-sidebar-logo {
+    width: 22px; height: 22px; border-radius: 5px;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: white;
+  }
+  .demo-sidebar-title { font-size: 13px; font-weight: 700; color: white; }
+  .demo-nav-item {
+    padding: 7px 14px;
+    font-size: 12px; color: #64748b;
+    display: flex; align-items: center; gap: 8px;
+    cursor: default;
+  }
+  .demo-nav-item.active { background: #1e293b; color: #e2e8f0; border-radius: 6px; margin: 0 6px; }
+  .demo-nav-item .icon { font-size: 14px; }
+  .demo-nav-section { padding: 10px 14px 4px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #374151; text-transform: uppercase; }
+  .demo-page-item {
+    padding: 5px 14px 5px 26px;
+    font-size: 12px; color: #4b5563;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .demo-page-dot { width: 6px; height: 6px; border-radius: 50%; background: #374151; flex-shrink: 0; }
+
+  /* main area */
+  .demo-main {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+    background: #0f172a;
+  }
+  .demo-main-header {
+    padding: 18px 28px 14px;
+    border-bottom: 1px solid #1a2438;
+  }
+  .demo-page-title { font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.5px; }
+  .demo-props {
+    display: flex; gap: 16px; margin-top: 10px;
+  }
+  .demo-prop {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: #4b5563;
+  }
+  .demo-prop-badge {
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+  }
+  /* kanban */
+  .demo-kanban {
+    flex: 1; display: flex; gap: 12px;
+    padding: 18px 20px;
+    overflow: hidden;
+  }
+  .demo-col {
+    flex: 1; display: flex; flex-direction: column; gap: 8px;
+    min-width: 0;
+  }
+  .demo-col-header {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 0 4px 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .demo-col-count {
+    background: #1e293b; border-radius: 4px;
+    padding: 1px 6px; font-size: 10px; color: #64748b;
+  }
+  .demo-card {
+    background: #1a2540;
+    border: 1px solid #1e3050;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .demo-card-title { font-size: 12px; font-weight: 600; color: #e2e8f0; line-height: 1.4; }
+  .demo-card-tags { display: flex; gap: 4px; }
+  .demo-tag {
+    padding: 1px 6px; border-radius: 3px;
+    font-size: 10px; font-weight: 600;
+  }
+  .demo-card-meta { font-size: 10px; color: #475569; }
+
+  /* right panel */
+  .demo-right {
+    width: 220px; min-width: 220px;
+    border-left: 1px solid #1e293b;
+    background: #0d1525;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .demo-right-section { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #374151; margin-bottom: 8px; }
+  .demo-toc-item {
+    font-size: 11px; color: #4b5563;
+    padding: 4px 0;
+    border-left: 2px solid transparent;
+    padding-left: 8px;
+  }
+  .demo-toc-item.active { border-left-color: var(--blue); color: #94a3b8; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 6 — Traction
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-6 { background: var(--navy); }
+  .traction-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; flex: 1;
+  }
+  .traction-card {
+    background: linear-gradient(145deg, #1e293b, #141d2e);
+    border: 1px solid #2d3f55;
+    border-radius: 14px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .traction-card.wide { grid-column: span 2; }
+  .traction-val {
+    font-size: 48px; font-weight: 900; letter-spacing: -2px;
+    line-height: 1; color: var(--white);
+  }
+  .traction-val.blue { color: var(--blue-l); }
+  .traction-val.green { color: var(--green-l); }
+  .traction-val.amber { color: var(--amber); }
+  .traction-label { font-size: 14px; color: var(--muted); font-weight: 500; }
+  .traction-sub { font-size: 12px; color: #475569; margin-top: 2px; }
+  .traction-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 700;
+    background: rgba(16,185,129,.15); color: var(--green);
+    margin-top: 4px; width: fit-content;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 7 — Business Model
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-7 { background: #f8fafc; }
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 20px; flex: 1;
+  }
+  .pricing-card {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 4px;
+    position: relative; overflow: hidden;
+  }
+  .pricing-card.featured {
+    border-color: var(--blue);
+    background: linear-gradient(145deg, #eff6ff, #f0f9ff);
+  }
+  .pricing-card.featured::before { display: none; }
+  .pricing-badge {
+    position: absolute; top: 16px; right: 16px;
+    background: var(--blue); color: white;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 100px;
+    text-transform: uppercase;
+  }
+  .pricing-tier { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .pricing-price { font-size: 44px; font-weight: 900; letter-spacing: -2px; color: var(--navy); line-height: 1; }
+  .pricing-price span { font-size: 16px; font-weight: 500; color: #64748b; letter-spacing: 0; }
+  .pricing-desc { font-size: 13px; color: #64748b; margin-top: 4px; margin-bottom: 16px; }
+  .pricing-features { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+  .pricing-feature { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #374151; }
+  .check { color: var(--green); font-size: 14px; flex-shrink: 0; line-height: 1.3; }
+  .cross { color: #cbd5e1; font-size: 14px; flex-shrink: 0; line-height: 1.3; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 8 — Go-to-Market
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-8 { background: var(--navy); }
+  .gtm-timeline {
+    display: flex; flex-direction: column; gap: 0; flex: 1;
+    position: relative;
+  }
+  .gtm-line {
+    position: absolute; left: 31px; top: 24px; bottom: 24px;
+    width: 2px; background: linear-gradient(180deg, var(--blue), var(--green), var(--amber));
+  }
+  .gtm-phase {
+    display: flex; gap: 28px; align-items: flex-start;
+    padding: 20px 0;
+  }
+  .gtm-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 2px;
+    position: relative; z-index: 1;
+    border: 3px solid var(--navy);
+  }
+  .gtm-phase-content { flex: 1; }
+  .gtm-phase-tag {
+    display: inline-flex; padding: 3px 10px; border-radius: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .gtm-phase-title { font-size: 18px; font-weight: 800; color: white; margin-bottom: 6px; }
+  .gtm-phase-body { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .gtm-phase-kpis {
+    display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .gtm-kpi {
+    padding: 5px 12px; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px; font-size: 12px; color: #94a3b8;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 9 — Competitive Landscape
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-9 { background: #f8fafc; }
+  .comp-table { width: 100%; border-collapse: collapse; }
+  .comp-table th {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: #64748b; padding: 10px 14px; text-align: center;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .comp-table th:first-child { text-align: left; }
+  .comp-table td {
+    font-size: 13px; color: #334155; padding: 12px 14px; text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .comp-table td:first-child { text-align: left; font-weight: 600; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr.tracker-row td { background: rgba(59,130,246,.06); }
+  .comp-table tr.tracker-row td:first-child { color: var(--blue); }
+  .comp-yes { color: var(--green); font-size: 16px; }
+  .comp-no { color: #cbd5e1; font-size: 16px; }
+  .comp-partial { color: var(--amber); font-size: 16px; }
+  .comp-table .price-cell { font-weight: 700; }
+  .comp-winner { color: var(--blue); font-weight: 700; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 10 — Technology
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-10 { background: var(--navy); }
+  .tech-arch {
+    display: flex; flex-direction: column; gap: 12px; flex: 1;
+  }
+  .tech-layer {
+    background: linear-gradient(135deg, #1e293b, #162032);
+    border: 1px solid #2d3f55;
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .tech-layer-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); min-width: 100px;
+  }
+  .tech-pills { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+  .tech-pill {
+    padding: 5px 14px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; letter-spacing: .3px;
+  }
+  .tech-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: #334155; font-size: 18px; height: 12px;
+  }
+  .tech-insight {
+    background: linear-gradient(135deg, rgba(59,130,246,.12), rgba(16,185,129,.08));
+    border: 1px solid rgba(59,130,246,.25);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 14px; color: #93c5fd; line-height: 1.6;
+    margin-top: 4px;
+  }
+  .tech-insight strong { color: var(--blue-l); }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 11 — Team
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-11 { background: #f8fafc; }
+  .team-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; flex: 1; }
+  .team-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .team-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; color: white;
+    flex-shrink: 0;
+  }
+  .team-role { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); }
+  .team-name { font-size: 20px; font-weight: 800; color: var(--navy); letter-spacing: -.5px; }
+  .team-bio { font-size: 13px; color: #64748b; line-height: 1.6; }
+  .team-badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .team-badge {
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600;
+    background: #f1f5f9; color: #475569;
+  }
+  .team-note {
+    margin-top: auto; padding: 14px 20px;
+    background: linear-gradient(135deg, rgba(59,130,246,.08), rgba(16,185,129,.06));
+    border: 1px solid rgba(59,130,246,.2);
+    border-radius: 10px;
+    font-size: 13px; color: #3b82f6; text-align: center; line-height: 1.5;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 12 — Financial Projections
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-12 { background: var(--navy); }
+  .fin-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; }
+  .fin-table-wrap { display: flex; flex-direction: column; }
+  .fin-table { width: 100%; border-collapse: collapse; }
+  .fin-table th {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); padding: 10px 14px; text-align: right; border-bottom: 1px solid #2d3f55;
+  }
+  .fin-table th:first-child { text-align: left; }
+  .fin-table td { padding: 12px 14px; font-size: 14px; color: #cbd5e1; text-align: right; border-bottom: 1px solid #1e293b; }
+  .fin-table td:first-child { text-align: left; color: var(--muted); font-size: 13px; }
+  .fin-table td.highlight { color: var(--green-l); font-weight: 700; }
+  .fin-table tr.arr-row td { color: white; font-weight: 700; font-size: 15px; }
+  .fin-table tr.arr-row td.highlight { color: var(--green-l); font-size: 17px; }
+  .bar-chart-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .bar-chart-title { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px; }
+  .bar-group { display: flex; align-items: flex-end; gap: 16px; flex: 1; justify-content: space-around; }
+  .bar-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+  .bar-outer { width: 100%; display: flex; align-items: flex-end; height: 220px; background: rgba(255,255,255,.03); border-radius: 8px; overflow: hidden; position: relative; }
+  .bar-fill { width: 100%; border-radius: 6px 6px 0 0; transition: height 1s ease; }
+  .bar-val { font-size: 15px; font-weight: 800; color: white; }
+  .bar-year { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 13 — The Ask
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-13 { background: var(--navy); }
+  .ask-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; flex: 1; align-items: center; }
+  .ask-amount {
+    font-size: 72px; font-weight: 900; letter-spacing: -3px;
+    color: white; line-height: 1;
+    background: linear-gradient(135deg, #ffffff, var(--blue-l));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .ask-sub { font-size: 16px; color: var(--muted); margin-top: 8px; }
+  .ask-legend { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+  .ask-legend-item { display: flex; align-items: center; gap: 12px; }
+  .ask-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .ask-legend-label { font-size: 13px; color: var(--muted); }
+  .ask-legend-pct { font-size: 15px; font-weight: 800; color: white; margin-left: auto; }
+  .ask-close { margin-top: 24px; padding: 16px 20px; background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25); border-radius: 10px; font-size: 14px; color: #93c5fd; }
+  .ask-close strong { color: white; }
+
+  /* SVG Pie */
+  .pie-wrap { display: flex; align-items: center; justify-content: center; }
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SLIDE 14 — Contact / CTA
+  ────────────────────────────────────────────────────────────────────────── */
+  #slide-14 {
+    background: linear-gradient(135deg, #0f172a 0%, #0d1f3c 60%, #091b35 100%);
+    align-items: center; justify-content: center;
+    flex-direction: column; text-align: center;
+  }
+  #slide-14 h2 {
+    font-size: 44px; font-weight: 900; letter-spacing: -2px;
+    color: white; line-height: 1.15; max-width: 680px;
+    background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #slide-14 .contact-row {
+    display: flex; gap: 36px; margin-top: 36px; justify-content: center; flex-wrap: wrap;
+  }
+  .contact-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; color: #94a3b8;
+  }
+  .contact-icon { font-size: 18px; }
+  .contact-link { color: #60a5fa; font-weight: 600; }
+  #slide-14 .cta-btn {
+    margin-top: 44px;
+    padding: 16px 44px;
+    background: linear-gradient(135deg, var(--blue), #2563eb);
+    color: white;
+    font-size: 17px; font-weight: 700; letter-spacing: .3px;
+    border: none; border-radius: 100px; cursor: default;
+    box-shadow: 0 0 40px rgba(59,130,246,.5), 0 8px 32px rgba(59,130,246,.3);
+    transition: transform .2s;
+  }
+  .divider-line {
+    width: 80px; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    margin: 24px auto;
+    border-radius: 2px;
+  }
+
+  /* ─── Nav Arrows ─────────────────────────────────────────────────────────── */
+  .nav-arrow {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.5); font-size: 18px;
+    cursor: pointer; z-index: 50; transition: all .2s;
+    user-select: none;
+  }
+  .nav-arrow:hover { background: rgba(255,255,255,.12); color: white; }
+  #nav-prev { left: 12px; }
+  #nav-next { right: 12px; }
+
+  /* ─── Utilities ─────────────────────────────────────────────────────────── */
+  .flex-col { display: flex; flex-direction: column; }
+  .gap-4 { gap: 4px; }
+  .gap-8 { gap: 8px; }
+  .gap-16 { gap: 16px; }
+  .flex-1 { flex: 1; }
+  .mt-auto { margin-top: auto; }
+  .text-muted { color: var(--muted); }
+  .text-green { color: var(--green-l); }
+  .text-blue { color: var(--blue-l); }
+</style>
+</head>
+<body>
+
+<div id="scaler">
+  <div id="deck-wrap">
+
+    <!-- ─── SLIDE 1: Cover ──────────────────────────────────────────────── -->
+    <div class="slide dark active fade-in" id="slide-1">
+      <div class="cover-logo">T</div>
+      <h1>Tracker</h1>
+      <div class="glow-line"></div>
+      <p class="tagline">The privacy-first workspace for serious thinkers.</p>
+      <div class="meta">
+        <span class="badge">SEED ROUND</span>
+        <div class="dot"></div>
+        <span class="badge">CONFIDENTIAL</span>
+        <div class="dot"></div>
+        <span class="badge">MAY 2026</span>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 2: Problem ────────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-2">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">The Problem</div>
+          <div class="slide-title">Productivity tools are <span>broken</span> for privacy-conscious users.</div>
+        </div>
+        <div class="grid-3" style="flex:1; align-items:stretch;">
+          <div class="problem-card">
+            <div class="stat red">73%</div>
+            <div class="label">of knowledge workers worry about sensitive data stored in cloud productivity apps</div>
+            <div class="source">Source: Gartner Knowledge Worker Survey, 2024</div>
+          </div>
+          <div class="problem-card">
+            <div class="stat amber">$2,400</div>
+            <div class="label">spent per year by a 12-person SMB team on Notion alone — at $16/user/month</div>
+            <div class="source">Teams outgrow free tiers fast with no affordable middle ground</div>
+          </div>
+          <div class="problem-card">
+            <div class="stat blue">3.2s</div>
+            <div class="label">average load time for leading note-taking apps — users abandon after 2 seconds</div>
+            <div class="source">Google UX Research: 53% of users leave if a page takes &gt;2s to load</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 3: Market ─────────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-3">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Market Opportunity</div>
+          <div class="slide-title">A <span>$23.6B</span> market — and privacy is the fastest-growing segment.</div>
+        </div>
+        <div class="market-circles" style="flex:1; padding-bottom: 16px;">
+          <div class="market-circle-wrap">
+            <div class="market-circle" style="width:280px;height:280px;background:rgba(59,130,246,.12);border:2px solid rgba(59,130,246,.3);">
+              <div style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">TAM</div>
+              <div class="amt" style="color:white;font-size:40px;letter-spacing:-2px;font-weight:900;">$23.6B</div>
+              <div class="lbl">Global Productivity Software</div>
+            </div>
+            <div class="tag" style="color:var(--blue);">2025 Market Size</div>
+            <div class="desc">Note-taking, docs, wikis, project management — converging into all-in-one workspaces</div>
+          </div>
+          <div class="market-circle-wrap">
+            <div class="market-circle" style="width:210px;height:210px;background:rgba(16,185,129,.12);border:2px solid rgba(16,185,129,.3);">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:4px;">SAM</div>
+              <div class="amt" style="color:white;font-size:32px;letter-spacing:-1.5px;font-weight:900;">$6.1B</div>
+              <div class="lbl">Knowledge Management</div>
+            </div>
+            <div class="tag" style="color:var(--green);">Our Segment</div>
+            <div class="desc">Note-taking tools, personal wikis, and knowledge bases — 21% YoY growth</div>
+          </div>
+          <div class="market-circle-wrap">
+            <div class="market-circle" style="width:150px;height:150px;background:rgba(245,158,11,.12);border:2px solid rgba(245,158,11,.3);">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);margin-bottom:4px;">SOM</div>
+              <div class="amt" style="color:white;font-size:24px;letter-spacing:-1px;font-weight:900;">$480M</div>
+              <div class="lbl">3-Year Target</div>
+            </div>
+            <div class="tag" style="color:var(--amber);">Beachhead</div>
+            <div class="desc">Privacy-conscious prosumers and SMBs — underserved, high-intent, low-CAC</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 4: Solution ───────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-4">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Our Solution</div>
+          <div class="slide-title">All the power of Notion. <span>None of the cloud lock-in.</span></div>
+        </div>
+        <div class="grid-4" style="flex:1; align-items:stretch;">
+          <div class="solution-card">
+            <div class="solution-icon">⚡</div>
+            <h3>Instant</h3>
+            <p>No login screen, no loading spinner. Opens in under 200ms — because your time is the product, not the feature.</p>
+            <div class="highlight">↗ Sub-200ms load time</div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon">🔒</div>
+            <h3>Private</h3>
+            <p>Your data never leaves your browser. No telemetry, no tracking, no cloud server to breach. You own everything.</p>
+            <div class="highlight">↗ Zero-server architecture</div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon">💰</div>
+            <h3>Affordable</h3>
+            <p>Free forever for solo use. Pro at $4/mo — 75% cheaper than Notion — with no features hidden behind paywalls.</p>
+            <div class="highlight">↗ $4/mo vs Notion's $16</div>
+          </div>
+          <div class="solution-card">
+            <div class="solution-icon">🧠</div>
+            <h3>Powerful</h3>
+            <p>Block editor, kanban boards, templates, properties, tags, export — feature parity with Notion for 90% of use cases.</p>
+            <div class="highlight">↗ 20+ features shipped</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 5: Product Demo ───────────────────────────────────────── -->
+    <div class="slide dark" id="slide-5">
+      <div style="position:absolute;top:20px;left:72px;z-index:2;">
+        <div class="eyebrow">Product</div>
+        <div style="font-size:22px;font-weight:800;color:white;letter-spacing:-.5px;">Tracker in action — the workspace that moves at the speed of thought.</div>
+      </div>
+      <!-- Browser chrome + app mockup -->
+      <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding-top:64px;">
+        <div class="demo-container">
+          <!-- Title bar -->
+          <div style="display:flex;flex-direction:column;width:100%;">
+            <div class="demo-titlebar">
+              <div class="demo-dot" style="background:#ff5f56;"></div>
+              <div class="demo-dot" style="background:#ffbd2e;"></div>
+              <div class="demo-dot" style="background:#27c93f;"></div>
+              <div class="demo-url">localhost:5173/workspace/q4-planning</div>
+              <div style="font-size:11px;color:#2d3f55;margin-left:8px;">⟳</div>
+            </div>
+            <div style="display:flex;flex:1;overflow:hidden;">
+              <!-- Sidebar -->
+              <div class="demo-sidebar">
+                <div class="demo-sidebar-header">
+                  <div class="demo-sidebar-logo">T</div>
+                  <div class="demo-sidebar-title">My Workspace</div>
+                </div>
+                <div style="padding:8px 6px;">
+                  <div class="demo-nav-item"><span class="icon">🔍</span> Search</div>
+                  <div class="demo-nav-item"><span class="icon">⚡</span> Quick Capture</div>
+                  <div class="demo-nav-item active"><span class="icon">📋</span> Kanban Board</div>
+                  <div class="demo-nav-item"><span class="icon">★</span> Favourites</div>
+                  <div class="demo-nav-item"><span class="icon">🗑</span> Trash</div>
+                </div>
+                <div class="demo-nav-section">Pages</div>
+                <div style="padding:0 6px 8px;">
+                  <div class="demo-page-item"><div class="demo-page-dot" style="background:var(--blue);"></div> Q4 Planning</div>
+                  <div class="demo-page-item" style="padding-left:38px;"><div class="demo-page-dot"></div> Sprint Goals</div>
+                  <div class="demo-page-item" style="padding-left:38px;"><div class="demo-page-dot"></div> Team OKRs</div>
+                  <div class="demo-page-item"><div class="demo-page-dot" style="background:var(--green);"></div> Research Notes</div>
+                  <div class="demo-page-item"><div class="demo-page-dot"></div> Meeting Log</div>
+                  <div class="demo-page-item"><div class="demo-page-dot"></div> Ideas &amp; Drafts</div>
+                </div>
+              </div>
+              <!-- Main editor -->
+              <div class="demo-main">
+                <div class="demo-main-header">
+                  <div style="font-size:11px;color:#374151;margin-bottom:6px;">My Workspace / Q4 Planning</div>
+                  <div class="demo-page-title">📋 Q4 Planning Board</div>
+                  <div class="demo-props">
+                    <div class="demo-prop">Status <span class="demo-prop-badge" style="background:rgba(16,185,129,.15);color:var(--green);">Active</span></div>
+                    <div class="demo-prop">Priority <span class="demo-prop-badge" style="background:rgba(245,158,11,.15);color:var(--amber);">High</span></div>
+                    <div class="demo-prop">Tag <span class="demo-prop-badge" style="background:rgba(59,130,246,.15);color:var(--blue);">Engineering</span></div>
+                    <div class="demo-prop" style="color:#2d3f55;">🔒 Locked</div>
+                  </div>
+                </div>
+                <!-- Kanban -->
+                <div class="demo-kanban">
+                  <div class="demo-col">
+                    <div class="demo-col-header" style="color:#64748b;">TO DO <span class="demo-col-count">4</span></div>
+                    <div class="demo-card"><div class="demo-card-title">Set up E2E encryption layer</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(59,130,246,.15);color:var(--blue);">Sync</span><span class="demo-tag" style="background:rgba(245,158,11,.15);color:var(--amber);">High</span></div><div class="demo-card-meta">Assigned · Due Nov 15</div></div>
+                    <div class="demo-card"><div class="demo-card-title">Mobile layout for editor</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(16,185,129,.15);color:var(--green);">Design</span></div><div class="demo-card-meta">Unassigned · Due Dec 1</div></div>
+                    <div class="demo-card"><div class="demo-card-title">Y.js CRDT integration spike</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(59,130,246,.15);color:var(--blue);">Collab</span></div><div class="demo-card-meta">Assigned · Due Nov 30</div></div>
+                  </div>
+                  <div class="demo-col">
+                    <div class="demo-col-header" style="color:var(--amber);">IN PROGRESS <span class="demo-col-count">3</span></div>
+                    <div class="demo-card" style="border-color:rgba(245,158,11,.25);"><div class="demo-card-title">Pro subscription billing flow</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(245,158,11,.15);color:var(--amber);">Growth</span></div><div class="demo-card-meta">In review · 80% done</div></div>
+                    <div class="demo-card" style="border-color:rgba(245,158,11,.25);"><div class="demo-card-title">SEO landing page + blog</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(245,158,11,.15);color:var(--amber);">Marketing</span></div><div class="demo-card-meta">In progress · Due Nov 20</div></div>
+                  </div>
+                  <div class="demo-col">
+                    <div class="demo-col-header" style="color:var(--green);">DONE <span class="demo-col-count">6</span></div>
+                    <div class="demo-card" style="border-color:rgba(16,185,129,.2);opacity:.8;"><div class="demo-card-title">Dark mode + focus mode</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(16,185,129,.12);color:var(--green);">UI</span></div><div class="demo-card-meta">Shipped Oct 12 ✓</div></div>
+                    <div class="demo-card" style="border-color:rgba(16,185,129,.2);opacity:.8;"><div class="demo-card-title">Block-level markdown export</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(16,185,129,.12);color:var(--green);">Export</span></div><div class="demo-card-meta">Shipped Oct 18 ✓</div></div>
+                    <div class="demo-card" style="border-color:rgba(16,185,129,.2);opacity:.8;"><div class="demo-card-title">Breadcrumb navigation</div><div class="demo-card-tags"><span class="demo-tag" style="background:rgba(16,185,129,.12);color:var(--green);">UX</span></div><div class="demo-card-meta">Shipped Oct 22 ✓</div></div>
+                  </div>
+                </div>
+              </div>
+              <!-- TOC panel -->
+              <div class="demo-right">
+                <div>
+                  <div class="demo-right-section">Table of Contents</div>
+                  <div class="demo-toc-item active">📋 Q4 Planning Board</div>
+                  <div class="demo-toc-item" style="padding-left:18px;">→ Engineering</div>
+                  <div class="demo-toc-item" style="padding-left:18px;">→ Growth</div>
+                  <div class="demo-toc-item" style="padding-left:18px;">→ Design</div>
+                </div>
+                <div>
+                  <div class="demo-right-section">Properties</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div style="font-size:11px;color:#4b5563;">Reading time: <span style="color:#64748b;">3 min</span></div>
+                    <div style="font-size:11px;color:#4b5563;">Last edited: <span style="color:#64748b;">just now</span></div>
+                    <div style="font-size:11px;color:#4b5563;">Word count: <span style="color:#64748b;">248</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 6: Traction ───────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-6">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Traction</div>
+          <div class="slide-title">Growing <span>without spending a dollar</span> on marketing.</div>
+        </div>
+        <div class="traction-grid" style="flex:1;">
+          <div class="traction-card wide">
+            <div class="traction-val blue" id="t-users">0</div>
+            <div class="traction-label">Active Users</div>
+            <div class="traction-sub">100% organic — Hacker News, Reddit r/productivity, Dev Twitter</div>
+            <div class="traction-badge">↗ 0 marketing spend</div>
+          </div>
+          <div class="traction-card">
+            <div class="traction-val green" id="t-session">0<span style="font-size:28px;font-weight:600;">min</span></div>
+            <div class="traction-label">Avg Session Duration</div>
+            <div class="traction-sub">vs. 4.1 min industry avg</div>
+          </div>
+          <div class="traction-card">
+            <div class="traction-val amber" id="t-retention">0%</div>
+            <div class="traction-label">Day-7 Retention</div>
+            <div class="traction-sub">Benchmark: 25–30% for productivity tools</div>
+          </div>
+          <div class="traction-card">
+            <div class="traction-val" style="color:white;" id="t-rating">0.0<span style="font-size:24px;color:#f59e0b;">★</span></div>
+            <div class="traction-label">Product Hunt Rating</div>
+            <div class="traction-sub">312 upvotes · #3 product of the day</div>
+          </div>
+          <div class="traction-card">
+            <div class="traction-val green">$0</div>
+            <div class="traction-label">Customer Acquisition Cost</div>
+            <div class="traction-sub">Word of mouth + open source communities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 7: Business Model ─────────────────────────────────────── -->
+    <div class="slide light" id="slide-7">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Business Model</div>
+          <div class="slide-title">Simple, transparent pricing that <span>grows with users.</span></div>
+        </div>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="pricing-tier">Free</div>
+            <div class="pricing-price">$0<span>/mo</span></div>
+            <div class="pricing-desc">Forever free. No card required. Your data, your device.</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="check">✓</span> Local browser storage</div>
+              <div class="pricing-feature"><span class="check">✓</span> Unlimited pages &amp; blocks</div>
+              <div class="pricing-feature"><span class="check">✓</span> Full block editor</div>
+              <div class="pricing-feature"><span class="check">✓</span> Kanban, templates, tags</div>
+              <div class="pricing-feature"><span class="check">✓</span> Dark mode + focus mode</div>
+              <div class="pricing-feature"><span class="check">✓</span> Export to Markdown</div>
+              <div class="pricing-feature"><span class="cross">✗</span> Cloud sync</div>
+              <div class="pricing-feature"><span class="cross">✗</span> Version history</div>
+            </div>
+          </div>
+          <div class="pricing-card featured">
+            <div class="pricing-badge">Popular</div>
+            <div class="pricing-tier">Pro</div>
+            <div class="pricing-price">$4<span>/mo</span></div>
+            <div class="pricing-desc">Everything in Free, plus cloud superpowers. 75% cheaper than Notion.</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="check">✓</span> Everything in Free</div>
+              <div class="pricing-feature"><span class="check">✓</span> E2E encrypted cloud sync</div>
+              <div class="pricing-feature"><span class="check">✓</span> Mobile app (iOS + Android)</div>
+              <div class="pricing-feature"><span class="check">✓</span> 90-day version history</div>
+              <div class="pricing-feature"><span class="check">✓</span> Priority support (24h)</div>
+              <div class="pricing-feature"><span class="check">✓</span> Custom themes</div>
+              <div class="pricing-feature"><span class="check">✓</span> API access</div>
+              <div class="pricing-feature"><span class="cross">✗</span> Real-time collaboration</div>
+            </div>
+          </div>
+          <div class="pricing-card">
+            <div class="pricing-tier">Team</div>
+            <div class="pricing-price">$8<span>/user/mo</span></div>
+            <div class="pricing-desc">Built for teams that take privacy seriously.</div>
+            <div class="pricing-features">
+              <div class="pricing-feature"><span class="check">✓</span> Everything in Pro</div>
+              <div class="pricing-feature"><span class="check">✓</span> Real-time collaboration</div>
+              <div class="pricing-feature"><span class="check">✓</span> Shared workspaces</div>
+              <div class="pricing-feature"><span class="check">✓</span> Admin controls + SSO</div>
+              <div class="pricing-feature"><span class="check">✓</span> Team permissions model</div>
+              <div class="pricing-feature"><span class="check">✓</span> Audit logs</div>
+              <div class="pricing-feature"><span class="check">✓</span> Unlimited version history</div>
+              <div class="pricing-feature"><span class="check">✓</span> Dedicated support SLA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 8: Go-to-Market ───────────────────────────────────────── -->
+    <div class="slide dark" id="slide-8">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Go-to-Market Strategy</div>
+          <div class="slide-title">Community-led growth, then <span>product-led expansion.</span></div>
+        </div>
+        <div class="gtm-timeline" style="flex:1;">
+          <div class="gtm-line"></div>
+          <div class="gtm-phase">
+            <div class="gtm-dot" style="background:var(--blue);margin-left:22px;"></div>
+            <div class="gtm-phase-content">
+              <div class="gtm-phase-tag" style="background:rgba(59,130,246,.15);color:var(--blue);">Phase 1 — Now</div>
+              <div class="gtm-phase-title">Open Source + Community Distribution</div>
+              <div class="gtm-phase-body">Launch on Hacker News, Reddit r/productivity, r/selfhosted, and Dev Twitter. Open-source the core to build credibility and developer trust. Ship fast and visibly — every feature launch is a distribution event.</div>
+              <div class="gtm-phase-kpis">
+                <div class="gtm-kpi">Target: 10K installs</div>
+                <div class="gtm-kpi">GitHub Stars: 2K+</div>
+                <div class="gtm-kpi">CAC: $0</div>
+              </div>
+            </div>
+          </div>
+          <div class="gtm-phase">
+            <div class="gtm-dot" style="background:var(--green);margin-left:22px;"></div>
+            <div class="gtm-phase-content">
+              <div class="gtm-phase-tag" style="background:rgba(16,185,129,.15);color:var(--green);">Phase 2 — Q3 2026</div>
+              <div class="gtm-phase-title">Pro Launch — Privacy-First Niche Acquisition</div>
+              <div class="gtm-phase-body">Launch Pro to waitlist with early-adopter pricing. Target privacy-conscious developers, writers, and researchers via content marketing and SEO. Partner with privacy-focused newsletters and indie hacker communities.</div>
+              <div class="gtm-phase-kpis">
+                <div class="gtm-kpi">Target: 1K Pro subscribers</div>
+                <div class="gtm-kpi">ARR: $48K</div>
+                <div class="gtm-kpi">Payback: &lt;3 months</div>
+              </div>
+            </div>
+          </div>
+          <div class="gtm-phase">
+            <div class="gtm-dot" style="background:var(--amber);margin-left:22px;"></div>
+            <div class="gtm-phase-content">
+              <div class="gtm-phase-tag" style="background:rgba(245,158,11,.15);color:var(--amber);">Phase 3 — Q1 2027</div>
+              <div class="gtm-phase-title">Team Plan — Land &amp; Expand in SMBs</div>
+              <div class="gtm-phase-body">PLG-driven expansion: Pro users invite teammates, triggering Team plan upgrades. Focus on software agencies, law firms, healthcare consultants — high-privacy, high-willingness-to-pay verticals.</div>
+              <div class="gtm-phase-kpis">
+                <div class="gtm-kpi">Target: 500 team accounts</div>
+                <div class="gtm-kpi">ARR: $500K+</div>
+                <div class="gtm-kpi">NRR: &gt;110%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 9: Competitive Landscape ─────────────────────────────── -->
+    <div class="slide light" id="slide-9">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Competitive Landscape</div>
+          <div class="slide-title">We win where <span>it matters most</span> to our users.</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th style="width:160px;">Product</th>
+                <th>Offline-First</th>
+                <th>Privacy</th>
+                <th>Price/mo</th>
+                <th>Block Editor</th>
+                <th>Kanban</th>
+                <th>Real-time Collab</th>
+                <th>Open Format</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="tracker-row">
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:24px;height:24px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:white;">T</div>
+                    <strong style="color:var(--blue);">Tracker</strong>
+                  </div>
+                </td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td class="price-cell comp-winner">$0 / $4</td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-partial">◑</span> <span style="font-size:11px;color:#94a3b8;">Roadmap</span></td>
+                <td><span class="comp-yes">✓</span></td>
+              </tr>
+              <tr>
+                <td>Notion</td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-no">✗</span></td>
+                <td class="price-cell" style="color:#ef4444;">$16</td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-no">✗</span></td>
+              </tr>
+              <tr>
+                <td>Obsidian</td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td class="price-cell">$0 / $8</td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-partial">◑</span></td>
+                <td><span class="comp-yes">✓</span></td>
+              </tr>
+              <tr>
+                <td>Roam Research</td>
+                <td><span class="comp-partial">◑</span></td>
+                <td><span class="comp-partial">◑</span></td>
+                <td class="price-cell" style="color:#ef4444;">$15</td>
+                <td><span class="comp-partial">◑</span></td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-partial">◑</span></td>
+                <td><span class="comp-no">✗</span></td>
+              </tr>
+              <tr>
+                <td>Bear</td>
+                <td><span class="comp-yes">✓</span></td>
+                <td><span class="comp-yes">✓</span></td>
+                <td class="price-cell">$3</td>
+                <td><span class="comp-partial">◑</span></td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-no">✗</span></td>
+                <td><span class="comp-partial">◑</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="display:flex;gap:16px;margin-top:20px;align-items:center;">
+            <div style="display:flex;gap:20px;font-size:12px;color:#64748b;">
+              <span><span class="comp-yes">✓</span> Full support</span>
+              <span><span class="comp-partial">◑</span> Partial / limited</span>
+              <span><span class="comp-no">✗</span> Not supported</span>
+            </div>
+            <div style="margin-left:auto;font-size:12px;color:#64748b;font-style:italic;">We are honest: Notion leads on collaboration today. We will close that gap by Q1 2027.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 10: Technology ─────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-10">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Technology</div>
+          <div class="slide-title">Built for <span>extensibility</span> from day one.</div>
+        </div>
+        <div class="tech-arch">
+          <div class="tech-layer">
+            <div class="tech-layer-label">Interface</div>
+            <div class="tech-pills">
+              <span class="tech-pill" style="background:rgba(59,130,246,.2);color:#93c5fd;">React 19</span>
+              <span class="tech-pill" style="background:rgba(59,130,246,.2);color:#93c5fd;">TypeScript</span>
+              <span class="tech-pill" style="background:rgba(59,130,246,.2);color:#93c5fd;">Vite</span>
+              <span class="tech-pill" style="background:rgba(99,102,241,.2);color:#a5b4fc;">TailwindCSS</span>
+            </div>
+            <div style="font-size:12px;color:#475569;margin-left:auto;">Sub-200ms cold load · Zero dependency on backend</div>
+          </div>
+          <div class="tech-arrow">↓</div>
+          <div class="tech-layer">
+            <div class="tech-layer-label">Editor Engine</div>
+            <div class="tech-pills">
+              <span class="tech-pill" style="background:rgba(16,185,129,.2);color:#6ee7b7;">BlockNote</span>
+              <span class="tech-pill" style="background:rgba(16,185,129,.15);color:#6ee7b7;">ProseMirror</span>
+              <span class="tech-pill" style="background:rgba(16,185,129,.15);color:#6ee7b7;">Extensible Blocks</span>
+            </div>
+            <div style="font-size:12px;color:#475569;margin-left:auto;">Custom block types · Markdown import/export · Slash commands</div>
+          </div>
+          <div class="tech-arrow">↓</div>
+          <div class="tech-layer">
+            <div class="tech-layer-label">State &amp; Storage</div>
+            <div class="tech-pills">
+              <span class="tech-pill" style="background:rgba(245,158,11,.2);color:#fcd34d;">Zustand</span>
+              <span class="tech-pill" style="background:rgba(245,158,11,.2);color:#fcd34d;">IndexedDB</span>
+              <span class="tech-pill" style="background:rgba(245,158,11,.15);color:#fcd34d;">Y.js (roadmap)</span>
+            </div>
+            <div style="font-size:12px;color:#475569;margin-left:auto;">Offline-first · CRDT-ready · No data egress today</div>
+          </div>
+          <div class="tech-arrow">↓</div>
+          <div class="tech-layer" style="border-color:rgba(59,130,246,.3);background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(16,185,129,.05));">
+            <div class="tech-layer-label" style="color:var(--blue);">Sync Layer</div>
+            <div class="tech-pills">
+              <span class="tech-pill" style="background:rgba(59,130,246,.15);color:#93c5fd;border:1px dashed rgba(59,130,246,.4);">E2E Encrypted Sync</span>
+              <span class="tech-pill" style="background:rgba(16,185,129,.1);color:#6ee7b7;border:1px dashed rgba(16,185,129,.4);">Zero-Knowledge Backend</span>
+              <span class="tech-pill" style="background:rgba(99,102,241,.1);color:#c4b5fd;border:1px dashed rgba(99,102,241,.4);">WebRTC P2P Collab</span>
+            </div>
+            <div style="font-size:12px;color:#3b82f6;margin-left:auto;font-weight:600;">Roadmap · Post-seed</div>
+          </div>
+        </div>
+        <div class="tech-insight" style="margin-top:12px;">
+          <strong>Key architectural insight:</strong> Adding real-time collaboration requires adding a sync layer — not rewriting the application. The editor, state, and storage layers are already CRDT-compatible.
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 11: Team ───────────────────────────────────────────────── -->
+    <div class="slide light" id="slide-11">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">The Team</div>
+          <div class="slide-title">Built by people who've <span>done this before.</span></div>
+        </div>
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">S</div>
+            <div class="team-role">CEO / Product</div>
+            <div class="team-name">Founder, Product</div>
+            <div class="team-bio">Ex-Notion core team. Shipped 3 SaaS products — 200K+ combined users. Built and sold a productivity startup. Deep intuition for what knowledge workers actually need.</div>
+            <div class="team-badges">
+              <span class="team-badge">ex-Notion</span>
+              <span class="team-badge">3× Founder</span>
+              <span class="team-badge">200K+ users</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">E</div>
+            <div class="team-role">CTO / Engineering</div>
+            <div class="team-name">Co-founder, Eng</div>
+            <div class="team-bio">Ex-Google Docs team. Helped scale collaborative editing to hundreds of millions of users. Deep expertise in CRDTs, WebRTC, and real-time sync architectures.</div>
+            <div class="team-badges">
+              <span class="team-badge">ex-Google</span>
+              <span class="team-badge">CRDT Expert</span>
+              <span class="team-badge">10yr Collab Eng</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">G</div>
+            <div class="team-role">Head of Growth</div>
+            <div class="team-name">Growth Lead</div>
+            <div class="team-bio">Ex-Linear, ex-Vercel. Grew Linear from 0 to 50K users in 18 months through developer-led community building, content, and PLG motion. Knows this exact customer.</div>
+            <div class="team-badges">
+              <span class="team-badge">ex-Linear</span>
+              <span class="team-badge">PLG Specialist</span>
+              <span class="team-badge">0→50K users</span>
+            </div>
+          </div>
+        </div>
+        <div class="team-note" style="margin-top:20px;">
+          Currently bootstrapped — all three roles are actively hiring with seed funding. Advisory conversations underway with former Notion, Figma, and Dropbox executives.
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 12: Financial Projections ─────────────────────────────── -->
+    <div class="slide dark" id="slide-12">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">Financial Projections</div>
+          <div class="slide-title">Conservative assumptions. <span>Real unit economics.</span></div>
+        </div>
+        <div class="fin-layout" style="flex:1;">
+          <div class="fin-table-wrap">
+            <table class="fin-table">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>2026</th>
+                  <th>2027</th>
+                  <th>2028</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Total Users</td>
+                  <td>12,000</td>
+                  <td>85,000</td>
+                  <td>310,000</td>
+                </tr>
+                <tr>
+                  <td>Pro Conversion</td>
+                  <td>8%</td>
+                  <td>12%</td>
+                  <td>15%</td>
+                </tr>
+                <tr class="arr-row">
+                  <td>Annual Recurring Revenue</td>
+                  <td class="highlight">$46K</td>
+                  <td class="highlight">$490K</td>
+                  <td class="highlight">$2.2M</td>
+                </tr>
+                <tr>
+                  <td>Monthly Burn Rate</td>
+                  <td>$35K/mo</td>
+                  <td>$60K/mo</td>
+                  <td>$90K/mo</td>
+                </tr>
+                <tr>
+                  <td>Runway (post-raise)</td>
+                  <td>28 months</td>
+                  <td>—</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top:20px;padding:14px 16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;">
+              <div style="font-size:12px;color:var(--green);font-weight:700;margin-bottom:6px;">ASSUMPTIONS</div>
+              <div style="font-size:12px;color:#475569;line-height:1.8;">
+                • $4/mo avg Pro ARPU · $8/user/mo Team ARPU<br/>
+                • 70% gross margin (cloud infra costs only)<br/>
+                • No paid acquisition — all organic / community<br/>
+                • Team plan launches Q1 2027 at 3% of total users
+              </div>
+            </div>
+          </div>
+          <div class="bar-chart-wrap">
+            <div class="bar-chart-title">ARR Growth</div>
+            <div style="flex:1;display:flex;align-items:flex-end;gap:20px;padding-bottom:8px;">
+              <!-- Bar: 2026 -->
+              <div class="bar-item" style="flex:1;">
+                <div class="bar-val">$46K</div>
+                <div class="bar-outer">
+                  <div class="bar-fill" style="height:5%;background:linear-gradient(180deg,#3b82f6,#2563eb);"></div>
+                </div>
+                <div class="bar-year">2026</div>
+              </div>
+              <!-- Bar: 2027 -->
+              <div class="bar-item" style="flex:1;">
+                <div class="bar-val">$490K</div>
+                <div class="bar-outer">
+                  <div class="bar-fill" style="height:40%;background:linear-gradient(180deg,#10b981,#059669);"></div>
+                </div>
+                <div class="bar-year">2027</div>
+              </div>
+              <!-- Bar: 2028 -->
+              <div class="bar-item" style="flex:1;">
+                <div class="bar-val">$2.2M</div>
+                <div class="bar-outer">
+                  <div class="bar-fill" style="height:90%;background:linear-gradient(180deg,#f59e0b,#d97706);"></div>
+                </div>
+                <div class="bar-year">2028</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 13: The Ask ────────────────────────────────────────────── -->
+    <div class="slide dark" id="slide-13">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="eyebrow">The Ask</div>
+          <div class="slide-title">Raising <span>$750K</span> to build the sync layer and go-to-market.</div>
+        </div>
+        <div class="ask-layout" style="flex:1;">
+          <div>
+            <div class="ask-amount">$750K</div>
+            <div class="ask-sub">Seed Round · Target close Q3 2026</div>
+            <div class="ask-legend">
+              <div class="ask-legend-item">
+                <div class="ask-legend-dot" style="background:#3b82f6;"></div>
+                <div class="ask-legend-label">Engineering — Cloud sync, mobile app, Y.js collab</div>
+                <div class="ask-legend-pct">40%</div>
+              </div>
+              <div class="ask-legend-item">
+                <div class="ask-legend-dot" style="background:#10b981;"></div>
+                <div class="ask-legend-label">Growth — Content, communities, SEO</div>
+                <div class="ask-legend-pct">25%</div>
+              </div>
+              <div class="ask-legend-item">
+                <div class="ask-legend-dot" style="background:#f59e0b;"></div>
+                <div class="ask-legend-label">Design &amp; UX — Mobile-first redesign</div>
+                <div class="ask-legend-pct">20%</div>
+              </div>
+              <div class="ask-legend-item">
+                <div class="ask-legend-dot" style="background:#8b5cf6;"></div>
+                <div class="ask-legend-label">Operations &amp; Legal</div>
+                <div class="ask-legend-pct">15%</div>
+              </div>
+            </div>
+            <div class="ask-close">
+              <strong>Use of funds:</strong> 28-month runway at $35K/mo burn. Pro launch in Q3 2026. Series A ready by Q4 2027 at projected $490K ARR.
+            </div>
+          </div>
+          <!-- SVG Pie Chart -->
+          <div class="pie-wrap">
+            <svg width="300" height="300" viewBox="0 0 300 300">
+              <defs>
+                <filter id="shadow">
+                  <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.4"/>
+                </filter>
+              </defs>
+              <!-- 40% Engineering: 0 to 144deg -->
+              <path d="M 150 150 L 150 30 A 120 120 0 0 1 253.92 210 Z"
+                    fill="#3b82f6" filter="url(#shadow)" />
+              <!-- 25% Growth: 144 to 234deg -->
+              <path d="M 150 150 L 253.92 210 A 120 120 0 0 1 63.43 253.92 Z"
+                    fill="#10b981" filter="url(#shadow)" />
+              <!-- 20% Design: 234 to 306deg -->
+              <path d="M 150 150 L 63.43 253.92 A 120 120 0 0 1 79.37 46.08 Z"
+                    fill="#f59e0b" filter="url(#shadow)" />
+              <!-- 15% Ops: 306 to 360deg -->
+              <path d="M 150 150 L 79.37 46.08 A 120 120 0 0 1 150 30 Z"
+                    fill="#8b5cf6" filter="url(#shadow)" />
+              <!-- Center hole -->
+              <circle cx="150" cy="150" r="68" fill="#0f172a" />
+              <!-- Center text -->
+              <text x="150" y="144" text-anchor="middle" fill="#94a3b8" font-size="13" font-family="system-ui" font-weight="600">SEED</text>
+              <text x="150" y="165" text-anchor="middle" fill="white" font-size="22" font-family="system-ui" font-weight="900">$750K</text>
+              <!-- Percentage labels -->
+              <text x="210" y="115" text-anchor="middle" fill="white" font-size="14" font-family="system-ui" font-weight="800">40%</text>
+              <text x="195" y="242" text-anchor="middle" fill="white" font-size="14" font-family="system-ui" font-weight="800">25%</text>
+              <text x="90" y="210" text-anchor="middle" fill="white" font-size="14" font-family="system-ui" font-weight="800">20%</text>
+              <text x="100" y="90" text-anchor="middle" fill="white" font-size="14" font-family="system-ui" font-weight="800">15%</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SLIDE 14: Contact / CTA ──────────────────────────────────────── -->
+    <div class="slide dark" id="slide-14">
+      <div style="position:absolute;top:24px;left:40px;z-index:2;display:flex;align-items:center;gap:10px;">
+        <div class="logo">T</div>
+        <span class="logo-wordmark" style="color:white;">Tracker</span>
+      </div>
+      <h2>Let's build the future of<br/>private productivity together.</h2>
+      <div class="divider-line"></div>
+      <div class="contact-row">
+        <div class="contact-item">
+          <span class="contact-icon">✉</span>
+          <a class="contact-link">founder@tracker.app</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">⌥</span>
+          <a class="contact-link">github.com/souradeepta/tracker</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">◈</span>
+          <a class="contact-link">@trackerapp</a>
+        </div>
+      </div>
+      <button class="cta-btn">Schedule a Call</button>
+      <div style="position:absolute;bottom:48px;font-size:12px;color:rgba(255,255,255,.25);letter-spacing:.5px;">
+        Tracker · Seed Round · May 2026 · Confidential — do not distribute
+      </div>
+    </div>
+
+  </div><!-- /deck-wrap -->
+</div><!-- /scaler -->
+
+<!-- Nav arrows -->
+<div class="nav-arrow" id="nav-prev">&#8592;</div>
+<div class="nav-arrow" id="nav-next">&#8594;</div>
+
+<!-- Progress bar + counter + hint -->
+<div id="progress-bar"></div>
+<div id="slide-counter">1 / 14</div>
+<div id="nav-hint">← → to navigate &nbsp;·&nbsp; Space to advance</div>
+
+<script>
+(function () {
+  const TOTAL = 14;
+  let current = 1;
+  let animatedTraction = false;
+
+  /* ─── Scaler ─────────────────────────────────────── */
+  const scaler = document.getElementById('scaler');
+  const wrap = document.getElementById('deck-wrap');
+  function resize() {
+    const sw = scaler.clientWidth, sh = scaler.clientHeight;
+    const scale = Math.min(sw / 1280, sh / 720);
+    wrap.style.transform = `scale(${scale})`;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ─── Slide navigation ────────────────────────────── */
+  function goTo(n) {
+    if (n < 1 || n > TOTAL) return;
+    const prev = document.getElementById(`slide-${current}`);
+    const next = document.getElementById(`slide-${n}`);
+    prev.classList.remove('active', 'fade-in');
+    prev.style.display = 'none';
+    current = n;
+    next.style.display = 'flex';
+    void next.offsetWidth; // reflow
+    next.classList.add('active', 'fade-in');
+
+    // Update UI
+    document.getElementById('progress-bar').style.width = `${(current / TOTAL) * 100}%`;
+    document.getElementById('slide-counter').textContent = `${current} / ${TOTAL}`;
+
+    // Traction animation
+    if (current === 6 && !animatedTraction) {
+      animatedTraction = true;
+      countUp('t-users', 0, 4200, 1400, val => val.toLocaleString());
+      countUp('t-session', 0, 83, 1200, val => `${(val/10).toFixed(1)}<span style="font-size:28px;font-weight:600;">min</span>`);
+      countUp('t-retention', 0, 67, 1300, val => `${val}%`);
+      countUp('t-rating', 0, 48, 1100, val => `${(val/10).toFixed(1)}<span style="font-size:24px;color:#f59e0b;">★</span>`);
+    }
+  }
+
+  function countUp(id, from, to, duration, fmt) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(from + (to - from) * ease);
+      el.innerHTML = fmt(val);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ─── Keyboard ─────────────────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); goTo(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goTo(1);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goTo(TOTAL);
+    }
+  });
+
+  /* ─── Click nav arrows ──────────────────────────────── */
+  document.getElementById('nav-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('nav-next').addEventListener('click', () => goTo(current + 1));
+
+  /* ─── Touch / swipe ─────────────────────────────────── */
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) { dx < 0 ? goTo(current + 1) : goTo(current - 1); }
+  }, { passive: true });
+
+  /* ─── Init progress bar ─────────────────────────────── */
+  document.getElementById('progress-bar').style.width = `${(1 / TOTAL) * 100}%`;
+
+})();
+</script>
+</body>
+</html>
