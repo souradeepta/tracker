@@ -45,6 +45,9 @@ interface PageStore {
 
   // Derived / selectors
   getAllTags: () => string[];
+
+  // Onboarding
+  initializeIfEmpty: () => void;
 }
 
 function newPage(overrides?: Partial<Page>): Page {
@@ -251,6 +254,33 @@ export const usePageStore = create<PageStore>()(
         const tagSet = new Set<string>();
         Object.values(pages).filter((p) => !p.deleted).forEach((p) => p.tags.forEach((t) => tagSet.add(t)));
         return Array.from(tagSet).sort();
+      },
+
+      initializeIfEmpty: () => {
+        const { pages, createPage, updateContent } = usePageStore.getState();
+        if (Object.keys(pages).length > 0) return;
+        const id = createPage(null, { title: "Getting Started", icon: "🚀" });
+        updateContent(id, [
+          { type: "heading", props: { level: 1, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Welcome to Tracker 👋", styles: {} }], children: [] },
+          { type: "paragraph", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Tracker is your personal knowledge workspace — a place to capture ideas, track projects, and organize your thoughts.", styles: {} }], children: [] },
+          { type: "heading", props: { level: 2, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Quick start", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Press ", styles: {} }, { type: "text", text: "⌘N", styles: { bold: true } }, { type: "text", text: " to create a new page from anywhere.", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Press ", styles: {} }, { type: "text", text: "⌘K", styles: { bold: true } }, { type: "text", text: " to search across all your pages.", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Type ", styles: {} }, { type: "text", text: "/", styles: { bold: true } }, { type: "text", text: " inside any page to insert headings, lists, code blocks, and more.", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Right-click any page in the sidebar to duplicate, favorite, lock, or delete it.", styles: {} }], children: [] },
+          { type: "heading", props: { level: 2, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Keyboard shortcuts", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "⌘⇧F", styles: { bold: true } }, { type: "text", text: "  — Focus mode (distraction-free writing)", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "⌘⇧B", styles: { bold: true } }, { type: "text", text: "  — Toggle Board / Kanban view", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "⌘⇧T", styles: { bold: true } }, { type: "text", text: "  — Open template gallery", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "⌘⇧G", styles: { bold: true } }, { type: "text", text: "  — Open tag browser", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "⌘⇧D", styles: { bold: true } }, { type: "text", text: "  — Toggle dark mode", styles: {} }], children: [] },
+          { type: "heading", props: { level: 2, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Power features", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Add a ", styles: {} }, { type: "text", text: "cover image", styles: { bold: true } }, { type: "text", text: " to personalize any page — click the icon above the title.", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Set ", styles: {} }, { type: "text", text: "status & priority", styles: { bold: true } }, { type: "text", text: " on pages, then view them in the Kanban board.", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Use ", styles: {} }, { type: "text", text: "tags", styles: { bold: true } }, { type: "text", text: " to cross-link pages across topics (⌘⇧G to browse).", styles: {} }], children: [] },
+          { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Lock a page", styles: { bold: true } }, { type: "text", text: " to prevent accidental edits — click the lock icon in the footer.", styles: {} }], children: [] },
+          { type: "paragraph", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Feel free to delete this page whenever you're ready. Happy writing! ✨", styles: { italic: true } }], children: [] },
+        ] as Parameters<typeof updateContent>[1]);
       },
     }),
     {
