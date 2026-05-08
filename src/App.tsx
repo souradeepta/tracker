@@ -102,7 +102,7 @@ export default function App() {
 
   return (
     <MantineProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-[#F4F3F0] dark:bg-[#141414]">
+      <div className="flex h-screen w-screen overflow-hidden bg-[#F5F4F1] dark:bg-[#111111]">
         <Sidebar
           onSearch={() => setSearchOpen(true)}
           onExport={handleExport}
@@ -114,7 +114,7 @@ export default function App() {
         <div className="flex-1 flex flex-col overflow-hidden">
 
           {/* Unified toolbar: view toggle + breadcrumb + actions */}
-          <div className="h-11 flex items-center gap-3 px-4 border-b border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#1F1F1F] flex-shrink-0">
+          <div className="h-11 flex items-center gap-3 px-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#1E1E1E] flex-shrink-0">
 
             {/* View toggle */}
             <div className="flex items-center gap-0.5 bg-[#F4F3F0] dark:bg-white/[0.05] rounded-lg p-0.5 flex-shrink-0">
