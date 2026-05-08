@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { usePageStore } from "../../store/pages";
 import { useSettingsStore } from "../../store/settings";
-import { groupPagesByStatus, type KanbanColumn } from "../../lib/kanban";
+import { groupPagesByStatus } from "../../lib/kanban";
 import { estimateReadingTime } from "../../lib/readingTime";
 
 function resetPages() {
@@ -113,7 +113,6 @@ describe("getPagesWithTag (store selector)", () => {
   });
 
   it("getAllTags returns unique tags across all live pages", () => {
-    const { getAllTags } = usePageStore.getState();
     const id1 = usePageStore.getState().createPage();
     usePageStore.getState().addTag(id1, "work");
     usePageStore.getState().addTag(id1, "design");

@@ -1,10 +1,9 @@
-import React, { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ChevronRight,
   ChevronDown,
   Plus,
   Trash2,
-  FileText,
   Search,
   Star,
   RotateCcw,
@@ -161,7 +160,7 @@ function TrashSection() {
 }
 
 // ─── Recent pages section ────────────────────────────────────────────────────
-function RecentSection({ onExport }: { onExport: (id: string) => void }) {
+function RecentSection() {
   const { pages, recentPageIds, setActive } = usePageStore();
   const [open, setOpen] = useState(true);
 
@@ -299,7 +298,7 @@ export function Sidebar({ onSearch, onExport, onTemplates }: Props) {
 
       <div className="flex-1 overflow-y-auto px-2 pb-2">
         {/* Recent */}
-        <RecentSection onExport={onExport} />
+        <RecentSection />
 
         {/* Favorites */}
         {favorites.length > 0 && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Tag, X, ChevronDown } from "lucide-react";
 import { usePageStore } from "../store/pages";
 import type { PageStatus, PagePriority } from "../types";

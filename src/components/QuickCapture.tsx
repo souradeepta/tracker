@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus, X, Zap } from "lucide-react";
 import { usePageStore } from "../store/pages";
 

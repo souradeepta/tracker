@@ -1,4 +1,3 @@
-import React from "react";
 import { X, Lock, Unlock, Download } from "lucide-react";
 import { useSettingsStore } from "../store/settings";
 import { usePageStore } from "../store/pages";

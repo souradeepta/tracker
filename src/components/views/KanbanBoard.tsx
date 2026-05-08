@@ -1,4 +1,3 @@
-import React from "react";
 import { Plus } from "lucide-react";
 import { usePageStore } from "../../store/pages";
 import { groupPagesByStatus } from "../../lib/kanban";

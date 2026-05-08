@@ -63,7 +63,7 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   useEffect(() => {
     const calc = () => {
       const text = editor.document
-        .map((b) => Array.isArray(b.content) ? (b.content as { text: string }[]).map((c) => c.text).join(" ") : "")
+        .map((b: { content?: unknown }) => Array.isArray(b.content) ? (b.content as { text: string }[]).map((c) => c.text).join(" ") : "")
         .join(" ");
       setCount(text.trim() ? text.trim().split(/\s+/).length : 0);
     };

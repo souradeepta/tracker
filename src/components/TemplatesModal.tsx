@@ -1,5 +1,4 @@
-import React from "react";
-import { X, FileText } from "lucide-react";
+import { X } from "lucide-react";
 import { TEMPLATES } from "../lib/templates";
 import { usePageStore } from "../store/pages";
 

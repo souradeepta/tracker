@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { List } from "lucide-react";
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { exportPageAsMarkdown, pageToMarkdown } from "../../lib/exportMarkdown";
-import type { Page, PartialBlock } from "../../types";
+import type { Page } from "../../types";
 import type { PartialBlock as BNPartialBlock } from "@blocknote/core";
 
 function makePage(overrides: Partial<Page> = {}): Page {

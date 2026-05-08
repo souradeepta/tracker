@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Search, FileText, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Search, X } from "lucide-react";
 import { usePageStore } from "../store/pages";
 
 interface Props {

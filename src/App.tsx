@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MantineProvider } from "@mantine/core";
 import { LayoutGrid, FileText } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
