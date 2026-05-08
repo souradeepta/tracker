@@ -22,12 +22,12 @@ function PageItem({ page, depth, onExport }: { page: Page; depth: number; onExpo
   return (
     <div>
       <div
-        className={`group flex items-center h-8 rounded-lg cursor-pointer select-none transition-colors
+        className={`group flex items-center h-9 rounded-lg cursor-pointer select-none transition-colors
           ${isActive
             ? "bg-[#F0EFEC] dark:bg-white/[0.07] text-[#1A1A1A] dark:text-white"
             : "text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white"
           }`}
-        style={{ paddingLeft: `${10 + depth * 14}px`, paddingRight: "6px" }}
+        style={{ paddingLeft: `${12 + depth * 14}px`, paddingRight: "6px" }}
         onClick={() => setActive(page.id)}
         onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}
         onMouseEnter={() => setHovered(true)}
@@ -159,7 +159,7 @@ function RecentSection() {
 // ─── Section header ───────────────────────────────────────────────────────────
 function SectionHeader({ label, onAdd }: { label: string; onAdd?: () => void }) {
   return (
-    <div className="flex items-center justify-between px-2 pt-3 pb-0.5">
+    <div className="flex items-center justify-between px-2 pt-4 pb-1">
       <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C4C3BF] dark:text-[#444]">
         {label}
       </span>
@@ -216,7 +216,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
   if (sidebarCollapsed) {
     return (
-      <aside className="w-12 flex-shrink-0 h-full bg-white dark:bg-[#1A1A1A] border-r border-black/[0.06] dark:border-white/[0.06] flex flex-col items-center py-3 gap-1">
+      <aside className="w-12 flex-shrink-0 h-full bg-white dark:bg-[#1E1E1E] rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center py-3 gap-1 overflow-hidden">
         <button onClick={toggleSidebarCollapsed} className={iconBtn} title="Expand sidebar"><PanelLeftOpen size={14} /></button>
         <button onClick={onSearch} className={iconBtn} title="Search"><Search size={14} /></button>
         <button onClick={() => createPage(null)} className={iconBtn} title="New page"><Plus size={14} /></button>
@@ -227,7 +227,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
   return (
     <aside
-      className="flex-shrink-0 h-full bg-white dark:bg-[#1A1A1A] border-r border-black/[0.06] dark:border-white/[0.06] flex flex-col relative"
+      className="flex-shrink-0 h-full bg-white dark:bg-[#1E1E1E] rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col relative overflow-hidden"
       style={{ width: sidebarWidth }}
     >
       {/* Workspace header */}
@@ -248,7 +248,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
       </div>
 
       {/* Nav */}
-      <div className="px-2 py-2 space-y-0.5 border-b border-black/[0.04] dark:border-white/[0.04]">
+      <div className="px-3 py-3 space-y-0.5 border-b border-black/[0.04] dark:border-white/[0.04]">
         <button
           onClick={() => setActive(null)}
           className={`w-full flex items-center gap-2.5 px-2.5 h-8 rounded-lg text-[13px] transition-colors ${
@@ -285,7 +285,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
       </div>
 
       {/* Page tree */}
-      <div className="flex-1 overflow-y-auto px-2 py-2 min-h-0">
+      <div className="flex-1 overflow-y-auto px-3 py-3 min-h-0">
         <RecentSection />
 
         {favorites.length > 0 && (
@@ -315,10 +315,10 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
       </div>
 
       {/* Footer */}
-      <div className="px-2 py-2 border-t border-black/[0.04] dark:border-white/[0.04]">
+      <div className="px-3 py-3 border-t border-black/[0.04] dark:border-white/[0.04]">
         <button
           onClick={() => createPage(null)}
-          className="w-full flex items-center gap-2 px-2.5 h-8 rounded-lg text-[13px] text-[#9B9A97] dark:text-[#555] hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 h-9 rounded-lg text-[13px] text-[#9B9A97] dark:text-[#555] hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
         >
           <Plus size={13} className="text-[#C4C3BF] dark:text-[#444]" />
           New page

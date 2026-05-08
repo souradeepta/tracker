@@ -83,7 +83,7 @@ export default function App() {
     onShortcuts: () => setShortcutsOpen(true),
   };
 
-  const btnCls = "w-7 h-7 flex items-center justify-center rounded-md text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors";
+  const btnCls = "w-7 h-7 flex items-center justify-center rounded-lg text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors";
 
   if (focusMode) {
     return (
@@ -102,7 +102,8 @@ export default function App() {
 
   return (
     <MantineProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-[#191919]">
+      {/* Island canvas — warm background between floating panels */}
+      <div className="flex h-screen w-screen overflow-hidden bg-[#EEECEA] dark:bg-[#141414] p-2 gap-2">
         <Sidebar
           onSearch={() => setSearchOpen(true)}
           onExport={handleExport}
@@ -110,17 +111,17 @@ export default function App() {
           onShortcuts={() => setShortcutsOpen(true)}
         />
 
-        {/* Main area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Main island */}
+        <div className="flex-1 flex flex-col overflow-hidden rounded-xl bg-white dark:bg-[#1E1E1E] shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
 
-          {/* Unified toolbar: view toggle + breadcrumb + actions */}
-          <div className="h-11 flex items-center gap-3 px-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-[#1E1E1E] flex-shrink-0">
+          {/* Toolbar */}
+          <div className="h-12 flex items-center gap-3 px-5 border-b border-black/[0.06] dark:border-white/[0.06] flex-shrink-0">
 
             {/* View toggle */}
             <div className="flex items-center gap-0.5 bg-[#F4F3F0] dark:bg-white/[0.05] rounded-lg p-0.5 flex-shrink-0">
               <button
                 onClick={() => setViewMode("notes")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "notes"
                     ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
                     : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
@@ -129,7 +130,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setViewMode("board")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "board"
                     ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
                     : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
@@ -138,7 +139,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* Breadcrumb (notes + active page only) */}
+            {/* Breadcrumb */}
             {viewMode === "notes" && activePage ? (
               <nav className="flex-1 flex items-center gap-0.5 min-w-0 overflow-hidden">
                 {breadcrumbs.map((item, i) => (
@@ -146,7 +147,7 @@ export default function App() {
                     {i > 0 && <ChevronRight size={11} className="flex-shrink-0 text-[#C4C3BF] dark:text-[#444444] mx-0.5" />}
                     <button
                       onClick={() => setActive(item.id)}
-                      className={`flex items-center gap-1 text-[12px] hover:text-[#37352F] dark:hover:text-white transition-colors truncate flex-shrink-0 max-w-[180px]
+                      className={`flex items-center gap-1.5 text-[12px] hover:text-[#37352F] dark:hover:text-white transition-colors truncate flex-shrink-0 max-w-[200px]
                         ${i === breadcrumbs.length - 1 ? "text-[#37352F] dark:text-white font-medium" : "text-[#9B9A97] dark:text-[#6B6B6B]"}`}
                     >
                       <span className="text-[13px]">{item.icon}</span>
@@ -159,7 +160,7 @@ export default function App() {
               <div className="flex-1" />
             )}
 
-            {/* Page actions (notes + active page only) */}
+            {/* Page actions */}
             {viewMode === "notes" && activePage ? (
               <div className="flex items-center gap-0.5 flex-shrink-0">
                 <button
