@@ -37,7 +37,7 @@ export function TableOfContents({ editor }: { editor: BlockNoteEditor }) {
   if (headings.length === 0) return null;
 
   return (
-    <div className="hidden xl:flex flex-col w-64 flex-shrink-0 pt-14 px-6 pb-6 border-l border-black/[0.06] dark:border-white/[0.06]">
+    <div className="hidden xl:flex flex-col w-72 flex-shrink-0 pt-14 px-8 pb-8 border-l border-black/[0.06] dark:border-white/[0.06]">
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 text-[11px] font-semibold text-[#9B9A97] dark:text-[#6B6B6B] uppercase tracking-widest mb-2 hover:text-[#37352F] dark:hover:text-white transition-colors"

@@ -109,7 +109,7 @@ function HomeDashboard({ pages, recentPageIds, onNew, onSearch, onTemplates }: {
 
   return (
     <div className="flex-1 overflow-y-auto bg-white dark:bg-[#191919]">
-      <div className="max-w-[860px] mx-auto px-24 pt-20 pb-20">
+      <div className="max-w-[860px] mx-auto px-[120px] pt-24 pb-24">
         <h1 className="text-[32px] font-bold text-[#1A1A1A] dark:text-white tracking-[-0.5px] mb-10">
           {greeting}
         </h1>
@@ -275,7 +275,7 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
           <PropertyPanel pageId={activePage.id} />
 
           {/* Page body */}
-          <div className="px-24 pt-12 pb-40">
+          <div className="px-[120px] pt-14 pb-40">
             <div className="mb-4 flex items-end gap-3">
               <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
               {activePage.locked && (
@@ -323,7 +323,7 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
 
           {/* Footer */}
           <div className="border-t border-black/[0.05] dark:border-white/[0.05]">
-            <div className="flex items-center justify-between px-24 py-4">
+            <div className="flex items-center justify-between px-[120px] py-5">
               <WordCount editor={editor} />
               <span className="text-[12px] text-[#C4C3BF] dark:text-[#444444]">
                 Updated {new Date(activePage.updatedAt).toLocaleDateString()}

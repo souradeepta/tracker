@@ -73,7 +73,7 @@ export function PropertyPanel({ pageId }: { pageId: string }) {
   };
 
   return (
-    <div className="border-b border-black/[0.04] dark:border-white/[0.04] px-24 py-3.5">
+    <div className="border-b border-black/[0.04] dark:border-white/[0.04] px-[120px] py-4">
       <div className="flex flex-wrap items-center gap-1.5">
         <Pill
           value={page.status}

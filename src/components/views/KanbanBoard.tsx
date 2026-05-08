@@ -155,7 +155,7 @@ export function KanbanBoard() {
 
       {/* Columns */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F9F9F7] dark:bg-[#111111]">
-        <div className="flex gap-5 p-6 h-full min-w-max items-start">
+        <div className="flex gap-5 p-8 h-full min-w-max items-start">
           {columns.map((col) => (
             <Column
               key={col.status}
