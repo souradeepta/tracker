@@ -24,7 +24,7 @@ export default function App() {
   const [viewMode, setViewMode]           = useState<ViewMode>("notes");
 
   const { dark, toggleDark, focusMode, toggleFocusMode } = useSettingsStore();
-  const { pages, activePageId, createPage, initializeIfEmpty, setActive, toggleFavorite, toggleLocked } = usePageStore();
+  const { pages, activePageId, loaded, createPage, initializeIfEmpty, setActive, toggleFavorite, toggleLocked } = usePageStore();
 
   const activePage = activePageId ? pages[activePageId] : null;
 
@@ -39,7 +39,8 @@ export default function App() {
   }
 
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
-  useEffect(() => { initializeIfEmpty(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { void initializeIfEmpty(); }, []);
 
   const handleExport = useCallback((id: string) => {
     const page = pages[id];
@@ -73,6 +74,16 @@ export default function App() {
     onTemplates: () => setTemplatesOpen(true),
     onShortcuts: () => setShortcutsOpen(true),
   };
+
+  if (!loaded) {
+    return (
+      <MantineProvider forceColorScheme={dark ? "dark" : "light"}>
+        <Box style={{ height: "100vh", width: "100vw", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--canvas)" }}>
+          <span style={{ fontSize: 13, color: "var(--text3)" }}>Loading…</span>
+        </Box>
+      </MantineProvider>
+    );
+  }
 
   if (focusMode) {
     return (
