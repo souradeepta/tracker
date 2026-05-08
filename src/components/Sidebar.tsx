@@ -22,48 +22,42 @@ function PageItem({ page, depth, onExport }: { page: Page; depth: number; onExpo
   return (
     <div>
       <div
-        className={`group flex items-center h-9 rounded-lg cursor-pointer select-none transition-colors
-          ${isActive
-            ? "bg-[#F0EFEC] dark:bg-white/[0.07] text-[#1A1A1A] dark:text-white"
-            : "text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white"
-          }`}
-        style={{ paddingLeft: `${12 + depth * 14}px`, paddingRight: "6px" }}
+        className={`nav-item${isActive ? " active" : ""}`}
+        style={{ paddingLeft: 12 + depth * 14, paddingRight: 6 }}
         onClick={() => setActive(page.id)}
         onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <button
-          className="w-4 h-4 flex items-center justify-center flex-shrink-0 text-[#C4C3BF] dark:text-[#444] hover:text-[#5E5C58] dark:hover:text-white/60 transition-colors mr-0.5"
+          style={{
+            width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, color: "var(--text3)", background: "transparent", border: "none",
+            cursor: "pointer", padding: 0, marginRight: 2,
+          }}
           onClick={(e) => { e.stopPropagation(); if (children.length > 0) toggleExpand(page.id); }}
         >
           {children.length > 0
             ? isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />
-            : <span className="w-3" />}
+            : <span style={{ width: 12, display: "inline-block" }} />}
         </button>
 
-        <span className="text-[14px] leading-none flex-shrink-0 mr-1.5">{page.icon}</span>
+        <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0, marginRight: 6 }}>{page.icon}</span>
 
-        <span className={`flex-1 text-[13px] truncate leading-none ${isActive ? "font-medium" : ""}`}>
-          {page.title || <span className="opacity-30 italic font-normal">Untitled</span>}
+        <span style={{ flex: 1, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", fontWeight: isActive ? 500 : 400 }}>
+          {page.title || <span style={{ opacity: 0.3, fontStyle: "italic", fontWeight: 400 }}>Untitled</span>}
         </span>
 
         {page.locked && !hovered && (
-          <Lock size={9} className="flex-shrink-0 mr-1 text-[#C4C3BF] dark:text-[#444]" />
+          <Lock size={9} style={{ flexShrink: 0, marginRight: 4, color: "var(--text3)" }} />
         )}
 
         {hovered && !isActive && (
-          <div className="flex items-center flex-shrink-0 gap-0.5 ml-1">
-            <button
-              className="w-5 h-5 flex items-center justify-center rounded-md text-[#C4C3BF] hover:text-[#5E5C58] dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06] transition-colors"
-              onClick={(e) => { e.stopPropagation(); onExport(page.id); }}
-            >
+          <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0, marginLeft: 4 }}>
+            <button className="icon-btn" style={{ width: 20, height: 20, borderRadius: 4 }} onClick={(e) => { e.stopPropagation(); onExport(page.id); }}>
               <Download size={10} />
             </button>
-            <button
-              className="w-5 h-5 flex items-center justify-center rounded-md text-[#C4C3BF] hover:text-[#5E5C58] dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06] transition-colors"
-              onClick={(e) => { e.stopPropagation(); createPage(page.id); }}
-            >
+            <button className="icon-btn" style={{ width: 20, height: 20, borderRadius: 4 }} onClick={(e) => { e.stopPropagation(); createPage(page.id); }}>
               <Plus size={10} />
             </button>
           </div>
@@ -93,29 +87,34 @@ function TrashSection() {
   if (trashed.length === 0) return null;
 
   return (
-    <div className="mt-1">
-      <button
-        className="w-full flex items-center gap-2 px-2 h-8 rounded-lg text-[12px] text-[#9B9A97] dark:text-[#555] hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
-        onClick={() => setOpen((v) => !v)}
-      >
+    <div style={{ marginTop: 4 }}>
+      <button className="nav-item" onClick={() => setOpen((v) => !v)} style={{ height: 32, fontSize: 12 }}>
         {open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         <Trash2 size={12} />
-        <span>Trash</span>
-        <span className="ml-auto text-[10px] bg-black/[0.06] dark:bg-white/[0.06] text-[#9B9A97] dark:text-[#555] px-1.5 py-0.5 rounded-full font-medium">
+        <span style={{ flex: 1 }}>Trash</span>
+        <span style={{ fontSize: 10, background: "rgba(0,0,0,0.06)", color: "var(--text2)", padding: "2px 6px", borderRadius: 999, fontWeight: 500 }}>
           {trashed.length}
         </span>
       </button>
       {open && (
-        <div className="mt-0.5 ml-4 space-y-0.5">
+        <div style={{ marginTop: 2, marginLeft: 16 }}>
           {trashed.map((page) => (
-            <div key={page.id} className="flex items-center gap-1.5 px-2 h-7 rounded-lg hover:bg-[#F0EFEC] dark:hover:bg-white/[0.03] group">
-              <span className="text-sm">{page.icon}</span>
-              <span className="flex-1 text-[12px] text-[#9B9A97] dark:text-[#555] truncate">{page.title || "Untitled"}</span>
-              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-[#9B9A97] hover:text-green-600 dark:hover:text-green-400 transition-all" onClick={() => restorePage(page.id)}><RotateCcw size={10} /></button>
-              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-[#9B9A97] hover:text-red-500 transition-all" onClick={() => permanentDelete(page.id)}><X size={10} /></button>
+            <div key={page.id} style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 8px", height: 28, borderRadius: 6 }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--hover)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+            >
+              <span style={{ fontSize: 13 }}>{page.icon}</span>
+              <span style={{ flex: 1, fontSize: 12, color: "var(--text2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{page.title || "Untitled"}</span>
+              <button className="icon-btn" style={{ width: 18, height: 18, borderRadius: 4 }} onClick={() => restorePage(page.id)}><RotateCcw size={10} /></button>
+              <button className="icon-btn" style={{ width: 18, height: 18, borderRadius: 4, color: "#f87171" }} onClick={() => permanentDelete(page.id)}><X size={10} /></button>
             </div>
           ))}
-          <button className="text-[11px] text-red-400 hover:text-red-600 px-2 py-0.5 rounded transition-colors" onClick={emptyTrash}>Empty trash</button>
+          <button
+            onClick={emptyTrash}
+            style={{ fontSize: 11, color: "#f87171", background: "transparent", border: "none", cursor: "pointer", padding: "2px 8px", borderRadius: 4 }}
+          >
+            Empty trash
+          </button>
         </div>
       )}
     </div>
@@ -130,24 +129,24 @@ function RecentSection() {
   if (recents.length === 0) return null;
 
   return (
-    <div className="mb-1">
+    <div style={{ marginBottom: 4 }}>
       <button
-        className="w-full flex items-center gap-1.5 px-2 h-6 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C4C3BF] dark:text-[#444] hover:text-[#9B9A97] dark:hover:text-[#666] transition-colors"
         onClick={() => setOpen((v) => !v)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6, padding: "0 8px", height: 24,
+          fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em",
+          color: "var(--text3)", background: "transparent", border: "none", cursor: "pointer", width: "100%",
+        }}
       >
         {open ? <ChevronDown size={9} /> : <ChevronRight size={9} />}
         Recent
       </button>
       {open && (
-        <div className="mb-2">
+        <div style={{ marginBottom: 8 }}>
           {recents.map((page) => (
-            <button
-              key={page.id}
-              className="w-full flex items-center gap-2 px-2 h-8 rounded-lg text-left text-[12px] text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
-              onClick={() => setActive(page.id)}
-            >
-              <span className="text-[13px] flex-shrink-0 opacity-70">{page.icon}</span>
-              <span className="flex-1 truncate">{page.title || "Untitled"}</span>
+            <button key={page.id} className="nav-item" onClick={() => setActive(page.id)} style={{ height: 32, fontSize: 12 }}>
+              <span style={{ fontSize: 13, flexShrink: 0, opacity: 0.7 }}>{page.icon}</span>
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{page.title || "Untitled"}</span>
             </button>
           ))}
         </div>
@@ -159,15 +158,12 @@ function RecentSection() {
 // ─── Section header ───────────────────────────────────────────────────────────
 function SectionHeader({ label, onAdd }: { label: string; onAdd?: () => void }) {
   return (
-    <div className="flex items-center justify-between px-2 pt-4 pb-1">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C4C3BF] dark:text-[#444]">
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 8px 4px" }}>
+      <span style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text3)" }}>
         {label}
       </span>
       {onAdd && (
-        <button
-          onClick={onAdd}
-          className="w-5 h-5 flex items-center justify-center rounded-md text-[#C4C3BF] dark:text-[#444] hover:text-[#5E5C58] dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.05] transition-colors"
-        >
+        <button className="icon-btn" style={{ width: 20, height: 20, borderRadius: 4 }} onClick={onAdd}>
           <Plus size={12} />
         </button>
       )}
@@ -187,23 +183,23 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
   const { pages, activePageId, createPage, setActive } = usePageStore();
   const { dark, toggleDark, sidebarWidth, setSidebarWidth, sidebarCollapsed, toggleSidebarCollapsed } = useSettingsStore();
 
-  const favorites = Object.values(pages).filter((p) => p.favorited && !p.deleted);
-  const rootPages = Object.values(pages).filter((p) => p.parentId === null && !p.deleted).sort((a, b) => a.createdAt - b.createdAt);
+  const favorites  = Object.values(pages).filter((p) => p.favorited && !p.deleted);
+  const rootPages  = Object.values(pages).filter((p) => p.parentId === null && !p.deleted).sort((a, b) => a.createdAt - b.createdAt);
 
   const dragging = useRef(false);
-  const startX = useRef(0);
-  const startW = useRef(0);
+  const startX   = useRef(0);
+  const startW   = useRef(0);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     dragging.current = true;
-    startX.current = e.clientX;
-    startW.current = sidebarWidth;
-    document.body.style.cursor = "col-resize";
+    startX.current   = e.clientX;
+    startW.current   = sidebarWidth;
+    document.body.style.cursor     = "col-resize";
     document.body.style.userSelect = "none";
     const onMove = (ev: MouseEvent) => { if (dragging.current) setSidebarWidth(startW.current + ev.clientX - startX.current); };
-    const onUp = () => {
+    const onUp   = () => {
       dragging.current = false;
-      document.body.style.cursor = "";
+      document.body.style.cursor     = "";
       document.body.style.userSelect = "";
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
@@ -212,86 +208,84 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
     window.addEventListener("mouseup", onUp);
   }, [sidebarWidth, setSidebarWidth]);
 
-  const iconBtn = "w-7 h-7 flex items-center justify-center rounded-lg text-[#C4C3BF] dark:text-[#444] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] hover:text-[#5E5C58] dark:hover:text-white transition-colors";
+  const sidebarStyle: React.CSSProperties = {
+    flexShrink: 0, height: "100%",
+    background: "var(--surface)", borderRadius: 16,
+    boxShadow: "0 0 0 1px var(--border), 0 2px 8px rgba(0,0,0,0.04)",
+    display: "flex", flexDirection: "column", position: "relative", overflow: "hidden",
+  };
 
   if (sidebarCollapsed) {
     return (
-      <aside className="w-12 flex-shrink-0 h-full bg-white dark:bg-[#1E1E1E] rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col items-center py-3 gap-1 overflow-hidden">
-        <button onClick={toggleSidebarCollapsed} className={iconBtn} title="Expand sidebar"><PanelLeftOpen size={14} /></button>
-        <button onClick={onSearch} className={iconBtn} title="Search"><Search size={14} /></button>
-        <button onClick={() => createPage(null)} className={iconBtn} title="New page"><Plus size={14} /></button>
-        <button onClick={onTemplates} className={iconBtn} title="Templates"><Layout size={14} /></button>
+      <aside style={{ ...sidebarStyle, width: 48, alignItems: "center", padding: "12px 0", gap: 4 }}>
+        <button className="icon-btn" onClick={toggleSidebarCollapsed} title="Expand"><PanelLeftOpen size={14} /></button>
+        <button className="icon-btn" onClick={onSearch} title="Search"><Search size={14} /></button>
+        <button className="icon-btn" onClick={() => createPage(null)} title="New page"><Plus size={14} /></button>
+        <button className="icon-btn" onClick={onTemplates} title="Templates"><Layout size={14} /></button>
       </aside>
     );
   }
 
   return (
-    <aside
-      className="flex-shrink-0 h-full bg-white dark:bg-[#1E1E1E] rounded-xl shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)] flex flex-col relative overflow-hidden"
-      style={{ width: sidebarWidth }}
-    >
+    <aside style={{ ...sidebarStyle, width: sidebarWidth }}>
       {/* Workspace header */}
-      <div className="flex items-center gap-2.5 px-3 h-14 flex-shrink-0 border-b border-black/[0.04] dark:border-white/[0.04]">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm flex-shrink-0">
-          <span className="text-white text-[11px] font-bold">T</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 12px", height: 56, flexShrink: 0, borderBottom: "1px solid var(--border)" }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#6366f1,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <span style={{ color: "#fff", fontSize: 11, fontWeight: 700 }}>T</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-[#1A1A1A] dark:text-white truncate leading-none">Tracker</p>
-          <p className="text-[10px] text-[#9B9A97] dark:text-[#555] leading-none mt-0.5">Personal workspace</p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracker</p>
+          <p style={{ fontSize: 10, color: "var(--text2)", margin: 0 }}>Personal workspace</p>
         </div>
-        <button onClick={toggleDark} className={iconBtn} title="Toggle dark mode">
+        <button className="icon-btn" onClick={toggleDark} title="Toggle dark mode">
           {dark ? <Sun size={13} /> : <Moon size={13} />}
         </button>
-        <button onClick={toggleSidebarCollapsed} className={iconBtn} title="Collapse sidebar">
+        <button className="icon-btn" onClick={toggleSidebarCollapsed} title="Collapse sidebar">
           <PanelLeftClose size={13} />
         </button>
       </div>
 
       {/* Nav */}
-      <div className="px-3 py-3 space-y-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+      <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)" }}>
         <button
+          className={`nav-item${activePageId === null ? " active" : ""}`}
           onClick={() => setActive(null)}
-          className={`w-full flex items-center gap-2.5 px-3 h-9 rounded-lg text-[13px] transition-colors ${
-            activePageId === null
-              ? "bg-[#F0EFEC] dark:bg-white/[0.07] text-[#1A1A1A] dark:text-white font-medium"
-              : "text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white"
-          }`}
         >
-          <Home size={13} className={activePageId === null ? "text-[#5E5C58] dark:text-white" : "text-[#C4C3BF] dark:text-[#444]"} />
+          <Home size={13} style={{ color: activePageId === null ? "var(--text2)" : "var(--text3)" }} />
           Home
         </button>
         <button
           onClick={onSearch}
-          className="w-full flex items-center gap-2.5 px-3 h-9 rounded-lg bg-[#F5F4F1] dark:bg-white/[0.04] text-[13px] text-[#9B9A97] dark:text-[#555] hover:bg-[#EDECE9] dark:hover:bg-white/[0.06] transition-colors"
+          style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "0 12px", height: 36, borderRadius: 8,
+            fontSize: 13, color: "var(--text2)", background: "var(--hover)", border: "none", cursor: "pointer",
+            width: "100%", marginTop: 2,
+          }}
         >
-          <Search size={13} className="text-[#C4C3BF] dark:text-[#444]" />
-          <span className="flex-1 text-left">Search…</span>
-          <kbd className="text-[10px] font-mono text-[#C4C3BF] dark:text-[#444]">⌘K</kbd>
+          <Search size={13} style={{ color: "var(--text3)" }} />
+          <span style={{ flex: 1, textAlign: "left" }}>Search…</span>
+          <kbd style={{ fontSize: 10, fontFamily: "monospace", color: "var(--text3)" }}>⌘K</kbd>
         </button>
         {([
-          { icon: <Layout size={13} />, label: "Templates", action: onTemplates },
+          { icon: <Layout size={13} />,   label: "Templates", action: onTemplates },
           { icon: <Keyboard size={13} />, label: "Shortcuts", action: onShortcuts },
-          { icon: <Zap size={13} />, label: "Quick capture", action: () => {} },
+          { icon: <Zap size={13} />,      label: "Quick capture", action: () => {} },
         ] as const).map(({ icon, label, action }) => (
-          <button
-            key={label}
-            onClick={action as () => void}
-            className="w-full flex items-center gap-2.5 px-3 h-9 rounded-lg text-[13px] text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
-          >
-            <span className="text-[#C4C3BF] dark:text-[#444] flex-shrink-0">{icon}</span>
-            <span className="flex-1 text-left">{label}</span>
+          <button key={label} className="nav-item" onClick={action as () => void} style={{ marginTop: 2 }}>
+            <span style={{ color: "var(--text3)" }}>{icon}</span>
+            <span style={{ flex: 1 }}>{label}</span>
           </button>
         ))}
       </div>
 
       {/* Page tree */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 min-h-0">
+      <div style={{ flex: 1, overflowY: "auto", padding: "12px 12px", minHeight: 0 }}>
         <RecentSection />
 
         {favorites.length > 0 && (
           <>
             <SectionHeader label="Favorites" />
-            <div className="mb-1">
+            <div style={{ marginBottom: 4 }}>
               {favorites.map((page) => <PageItem key={page.id} page={page} depth={0} onExport={onExport} />)}
             </div>
           </>
@@ -302,7 +296,13 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
           {rootPages.length === 0 ? (
             <button
               onClick={() => createPage(null)}
-              className="w-full flex items-center gap-2 px-2.5 py-2 mt-1 rounded-lg text-[12px] text-[#C4C3BF] dark:text-[#444] border border-dashed border-black/[0.08] dark:border-white/[0.06] hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#5E5C58] dark:hover:text-white transition-colors"
+              style={{
+                display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", marginTop: 4,
+                borderRadius: 8, fontSize: 12, color: "var(--text3)", background: "transparent",
+                border: "1px dashed var(--border)", cursor: "pointer", width: "100%",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--hover)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
               <Plus size={12} /> Create your first page
             </button>
@@ -315,20 +315,19 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-3 border-t border-black/[0.04] dark:border-white/[0.04]">
-        <button
-          onClick={() => createPage(null)}
-          className="w-full flex items-center gap-2.5 px-3 h-9 rounded-lg text-[13px] text-[#9B9A97] dark:text-[#555] hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
-        >
-          <Plus size={13} className="text-[#C4C3BF] dark:text-[#444]" />
+      <div style={{ padding: "8px 12px", borderTop: "1px solid var(--border)" }}>
+        <button className="nav-item" onClick={() => createPage(null)}>
+          <Plus size={13} style={{ color: "var(--text3)" }} />
           New page
         </button>
       </div>
 
       {/* Resize handle */}
       <div
-        className="absolute top-0 right-0 w-[3px] h-full cursor-col-resize hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-colors"
+        style={{ position: "absolute", top: 0, right: 0, width: 3, height: "100%", cursor: "col-resize" }}
         onMouseDown={onMouseDown}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--border)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
       />
     </aside>
   );

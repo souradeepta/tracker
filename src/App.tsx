@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, Box, Paper, Group, Text } from "@mantine/core";
 import { LayoutGrid, FileText, Star, Lock, Unlock, Download, ChevronRight } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Editor } from "./components/Editor";
@@ -17,11 +17,11 @@ import { exportPageAsMarkdown } from "./lib/exportMarkdown";
 type ViewMode = "notes" | "board";
 
 export default function App() {
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen]       = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [tagBrowserOpen, setTagBrowserOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("notes");
+  const [viewMode, setViewMode]           = useState<ViewMode>("notes");
 
   const { dark, toggleDark, focusMode, toggleFocusMode } = useSettingsStore();
   const { pages, activePageId, createPage, initializeIfEmpty, setActive, toggleFavorite, toggleLocked } = usePageStore();
@@ -68,36 +68,32 @@ export default function App() {
 
   const editorProps = {
     onExport: handleExport,
-    onNew: () => createPage(null),
-    onSearch: () => setSearchOpen(true),
+    onNew:       () => createPage(null),
+    onSearch:    () => setSearchOpen(true),
     onTemplates: () => setTemplatesOpen(true),
     onShortcuts: () => setShortcutsOpen(true),
   };
 
   if (focusMode) {
     return (
-      <MantineProvider>
-        <div className="flex flex-col h-screen w-screen overflow-hidden bg-white dark:bg-[#191919]">
+      <MantineProvider forceColorScheme={dark ? "dark" : "light"}>
+        <Box style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--surface)" }}>
           <FocusModeBar onExport={handleExport} />
-          <div className="flex-1 overflow-hidden pt-[41px]">
+          <Box style={{ flex: 1, overflow: "hidden", paddingTop: 41 }}>
             <Editor {...editorProps} />
-          </div>
+          </Box>
           <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
           <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-        </div>
+        </Box>
       </MantineProvider>
     );
   }
 
-  const btnCls = "w-8 h-8 flex items-center justify-center rounded-lg text-[#9B9A97] dark:text-[#666] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] hover:text-[#1A1A1A] dark:hover:text-white transition-colors";
-
   return (
-    <MantineProvider>
-      {/* ── Island canvas ───────────────────────────────────────────────────── */}
-      <div
-        className="flex h-screen w-screen overflow-hidden gap-3 p-3"
-        style={{ background: "var(--canvas-bg, #D8D3CD)" }}
-      >
+    <MantineProvider forceColorScheme={dark ? "dark" : "light"}>
+      {/* Island canvas */}
+      <Box style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", gap: 12, padding: 12, background: "var(--canvas)" }}>
+
         <Sidebar
           onSearch={() => setSearchOpen(true)}
           onExport={handleExport}
@@ -105,14 +101,20 @@ export default function App() {
           onShortcuts={() => setShortcutsOpen(true)}
         />
 
-        {/* ── Main island ─────────────────────────────────────────────────── */}
-        <div className="flex-1 flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#1E1E1E] shadow-lg">
-
+        {/* Main island */}
+        <Paper
+          radius="xl"
+          shadow="xs"
+          style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)" }}
+        >
           {/* Toolbar */}
-          <div className="h-12 flex items-center gap-4 px-6 border-b border-black/[0.07] dark:border-white/[0.07] flex-shrink-0 bg-white dark:bg-[#1E1E1E]">
-
+          <Group
+            px={24}
+            gap={16}
+            style={{ height: 48, flexShrink: 0, borderBottom: "1px solid var(--border)", background: "var(--surface)" }}
+          >
             {/* View toggle */}
-            <div className="flex items-center bg-black/[0.05] dark:bg-white/[0.06] rounded-lg p-1 gap-0.5 flex-shrink-0">
+            <Group gap={2} style={{ background: "rgba(0,0,0,0.05)", borderRadius: 8, padding: 4, flexShrink: 0 }}>
               {([
                 { mode: "notes" as ViewMode, icon: <FileText size={12} />, label: "Notes" },
                 { mode: "board" as ViewMode, icon: <LayoutGrid size={12} />, label: "Board" },
@@ -120,75 +122,82 @@ export default function App() {
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all ${
-                    viewMode === mode
-                      ? "bg-white dark:bg-[#2C2C2C] text-[#1A1A1A] dark:text-white shadow-sm"
-                      : "text-[#9B9A97] dark:text-[#666] hover:text-[#1A1A1A] dark:hover:text-white"
-                  }`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "5px 12px",
+                    borderRadius: 6, fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer",
+                    transition: "all 120ms",
+                    background: viewMode === mode ? "var(--surface)" : "transparent",
+                    color: viewMode === mode ? "var(--text)" : "var(--text2)",
+                    boxShadow: viewMode === mode ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                  }}
                 >
                   {icon} {label}
                 </button>
               ))}
-            </div>
+            </Group>
 
             {/* Breadcrumb */}
             {viewMode === "notes" && activePage ? (
-              <nav className="flex-1 flex items-center gap-1 min-w-0 overflow-hidden">
+              <Group gap={4} style={{ flex: 1, overflow: "hidden" }}>
                 {breadcrumbs.map((item, i) => (
                   <Fragment key={item.id}>
-                    {i > 0 && <ChevronRight size={12} className="flex-shrink-0 text-[#C4C3BF] dark:text-[#555]" />}
+                    {i > 0 && <ChevronRight size={12} style={{ color: "var(--text3)", flexShrink: 0 }} />}
                     <button
                       onClick={() => setActive(item.id)}
-                      className={`flex items-center gap-1.5 text-[12px] transition-colors truncate flex-shrink-0 max-w-[200px] px-1.5 py-0.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.05] ${
-                        i === breadcrumbs.length - 1
-                          ? "text-[#37352F] dark:text-white font-medium"
-                          : "text-[#9B9A97] dark:text-[#666]"
-                      }`}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 5, fontSize: 12,
+                        color: i === breadcrumbs.length - 1 ? "var(--text)" : "var(--text2)",
+                        fontWeight: i === breadcrumbs.length - 1 ? 500 : 400,
+                        background: "transparent", border: "none", cursor: "pointer",
+                        borderRadius: 6, padding: "3px 6px",
+                        maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flexShrink: 0,
+                      }}
                     >
-                      <span className="text-[13px]">{item.icon}</span>
-                      <span className="truncate">{item.title || "Untitled"}</span>
+                      <span style={{ fontSize: 13 }}>{item.icon}</span>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{item.title || "Untitled"}</span>
                     </button>
                   </Fragment>
                 ))}
-              </nav>
+              </Group>
             ) : (
-              <div className="flex-1" />
+              <Box style={{ flex: 1 }} />
             )}
 
             {/* Actions */}
             {viewMode === "notes" && activePage ? (
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <Group gap={4} style={{ flexShrink: 0 }}>
                 <button
                   onClick={() => toggleFavorite(activePage.id)}
-                  className={`${btnCls} ${activePage.favorited ? "text-amber-400" : ""}`}
+                  className="icon-btn"
                   title="Favorite"
+                  style={{ color: activePage.favorited ? "#F59E0B" : undefined }}
                 >
                   <Star size={14} fill={activePage.favorited ? "currentColor" : "none"} />
                 </button>
-                <button onClick={() => toggleLocked(activePage.id)} className={btnCls} title="Lock">
+                <button onClick={() => toggleLocked(activePage.id)} className="icon-btn" title="Lock">
                   {activePage.locked ? <Unlock size={14} /> : <Lock size={14} />}
                 </button>
-                <button onClick={() => handleExport(activePage.id)} className={btnCls} title="Export">
+                <button onClick={() => handleExport(activePage.id)} className="icon-btn" title="Export">
                   <Download size={14} />
                 </button>
-              </div>
+              </Group>
             ) : (
-              <span className="text-[11px] text-[#C4C3BF] dark:text-[#444] font-mono select-none">
+              <Text size="xs" style={{ color: "var(--text3)", fontFamily: "monospace" }}>
                 press ? for shortcuts
-              </span>
+              </Text>
             )}
-          </div>
+          </Group>
 
           {/* Content */}
           {viewMode === "notes" ? <Editor {...editorProps} /> : <KanbanBoard />}
-        </div>
+        </Paper>
 
         <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
         <TemplatesModal open={templatesOpen} onClose={() => setTemplatesOpen(false)} />
         <TagBrowser open={tagBrowserOpen} onClose={() => setTagBrowserOpen(false)} />
         <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
         <QuickCapture />
-      </div>
+      </Box>
     </MantineProvider>
   );
 }

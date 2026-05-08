@@ -2,20 +2,12 @@ import { useEffect, useState } from "react";
 import type { BlockNoteEditor } from "@blocknote/core";
 import { List } from "lucide-react";
 
-interface Heading {
-  id: string;
-  text: string;
-  level: number;
-}
+interface Heading { id: string; text: string; level: number; }
 
 function extractHeadings(editor: BlockNoteEditor): Heading[] {
   const headings: Heading[] = [];
   for (const block of editor.document) {
-    if (
-      block.type === "heading" &&
-      Array.isArray(block.content) &&
-      block.content.length > 0
-    ) {
+    if (block.type === "heading" && Array.isArray(block.content) && block.content.length > 0) {
       const text = (block.content as { text: string }[]).map((c) => c.text).join("");
       if (text.trim()) {
         headings.push({ id: block.id, text, level: (block.props as { level: number }).level ?? 1 });
@@ -37,21 +29,41 @@ export function TableOfContents({ editor }: { editor: BlockNoteEditor }) {
   if (headings.length === 0) return null;
 
   return (
-    <div className="hidden xl:flex flex-col w-72 flex-shrink-0 pt-14 px-8 pb-8 border-l border-black/[0.06] dark:border-white/[0.06]">
+    <div style={{
+      display: "none",
+      flexDirection: "column",
+      width: 240,
+      flexShrink: 0,
+      paddingTop: 56,
+      paddingLeft: 24,
+      paddingRight: 24,
+      paddingBottom: 24,
+      borderLeft: "1px solid var(--border)",
+    }}
+    className="toc-panel"
+    >
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-[11px] font-semibold text-[#9B9A97] dark:text-[#6B6B6B] uppercase tracking-widest mb-2 hover:text-[#37352F] dark:hover:text-white transition-colors"
+        style={{
+          display: "flex", alignItems: "center", gap: 6, fontSize: 11,
+          fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em",
+          color: "var(--text3)", background: "transparent", border: "none",
+          cursor: "pointer", marginBottom: 8, padding: 0,
+          transition: "color 100ms",
+        }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--text)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--text3)"; }}
       >
         <List size={12} />
         On this page
       </button>
       {open && (
-        <div className="flex flex-col gap-0.5">
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {headings.map((h) => (
             <button
               key={h.id}
-              className="text-left text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white truncate py-0.5 transition-colors"
-              style={{ paddingLeft: `${(h.level - 1) * 10}px` }}
+              className="toc-link"
+              style={{ paddingLeft: (h.level - 1) * 10 }}
               onClick={() => {
                 const el = document.querySelector(`[data-id="${h.id}"]`);
                 el?.scrollIntoView({ behavior: "smooth", block: "start" });

@@ -32,21 +32,38 @@ function IconPicker({ icon, pageId, locked }: { icon: string; pageId: string; lo
   }, [open]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div ref={ref} style={{ position: "relative" }}>
       <button
-        className="text-5xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] rounded-xl p-2 -ml-2 transition-colors disabled:cursor-default"
         onClick={() => !locked && setOpen((v) => !v)}
         disabled={locked}
+        style={{
+          fontSize: 48, lineHeight: 1, background: "transparent", border: "none",
+          borderRadius: 12, padding: "8px 8px", marginLeft: -8,
+          cursor: locked ? "default" : "pointer",
+          transition: "background 100ms",
+        }}
+        onMouseEnter={(e) => { if (!locked) (e.currentTarget as HTMLButtonElement).style.background = "var(--hover)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
       >
         {icon}
       </button>
       {open && !locked && (
-        <div className="absolute top-16 left-0 z-50 bg-white dark:bg-[#1E1E1E] border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-xl p-3 grid grid-cols-8 gap-1 w-72">
+        <div style={{
+          position: "absolute", top: 72, left: 0, zIndex: 50,
+          background: "var(--surface)", border: "1px solid var(--border)",
+          borderRadius: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          padding: 12, display: "grid", gridTemplateColumns: "repeat(8,1fr)", gap: 4, width: 288,
+        }}>
           {EMOJI_OPTIONS.map((e) => (
             <button
               key={e}
-              className="text-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] rounded-lg p-1.5 transition-colors"
               onClick={() => { updateIcon(pageId, e); setOpen(false); }}
+              style={{
+                fontSize: 20, background: "transparent", border: "none", borderRadius: 8,
+                padding: 6, cursor: "pointer", transition: "background 100ms",
+              }}
+              onMouseEnter={(el) => { (el.currentTarget as HTMLButtonElement).style.background = "var(--hover)"; }}
+              onMouseLeave={(el) => { (el.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             >
               {e}
             </button>
@@ -73,16 +90,15 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   }, [editor]);
   const readingMins = estimateReadingTime(count);
   return (
-    <div className="flex items-center gap-4 text-[12px] text-[#9B9A97] dark:text-[#555]">
+    <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, color: "var(--text3)" }}>
       <span>{count} {count === 1 ? "word" : "words"}</span>
-      <span className="flex items-center gap-1.5">
+      <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <Clock size={11} /> {readingMins} min read
       </span>
     </div>
   );
 }
 
-// ─── Time helper ──────────────────────────────────────────────────────────────
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
@@ -111,48 +127,49 @@ function HomeDashboard({ pages, recentPageIds, onNew, onSearch, onTemplates }: {
     .slice(0, 6);
 
   return (
-    <div className="flex-1 overflow-y-auto bg-white dark:bg-[#191919]">
-      {/* Centered column — same width as page content */}
-      <div className="content-col px-12 pt-24 pb-24">
-        <h1 className="text-4xl font-bold text-[#1A1A1A] dark:text-white tracking-tight mb-12">
+    <div style={{ flex: 1, overflowY: "auto", background: "var(--surface)" }}>
+      <div className="content-col" style={{ padding: "96px 48px 96px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 48, margin: "0 0 48px" }}>
           {greeting}
         </h1>
 
         {recent.length > 0 && (
-          <section className="mb-12">
-            <p className="text-xs font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-widest mb-4 flex items-center gap-2">
+          <section style={{ marginBottom: 48 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text3)", display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <Clock size={11} /> Recently visited
             </p>
-            <div className="grid grid-cols-3 gap-4">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
               {recent.map((page) => {
                 const coverGrad = page.cover ? COVERS[page.cover] : null;
                 return (
                   <button
                     key={page.id}
                     onClick={() => setActive(page.id)}
-                    className="text-left border border-black/[0.07] dark:border-white/[0.07] rounded-2xl overflow-hidden hover:shadow-lg transition-all bg-white dark:bg-[#1E1E1E] hover:border-black/[0.14] dark:hover:border-white/[0.14]"
+                    style={{
+                      textAlign: "left", border: "1px solid var(--border)", borderRadius: 16,
+                      overflow: "hidden", background: "var(--surface)", cursor: "pointer",
+                      transition: "box-shadow 150ms, border-color 150ms",
+                    }}
+                    onMouseEnter={(e) => {
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.10)";
+                      el.style.borderColor = "rgba(0,0,0,0.14)";
+                    }}
+                    onMouseLeave={(e) => {
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.boxShadow = "none";
+                      el.style.borderColor = "var(--border)";
+                    }}
                   >
-                    <div
-                      className="h-20"
-                      style={coverGrad
-                        ? { background: coverGrad }
-                        : { background: "linear-gradient(135deg, #f0ede8 0%, #e8e4de 100%)" }
-                      }
-                    >
-                      {!coverGrad && (
-                        <div className="h-full flex items-center justify-center text-4xl opacity-25">
-                          {page.icon}
-                        </div>
-                      )}
+                    <div style={{ height: 80, background: coverGrad ?? "linear-gradient(135deg,#f0ede8,#e8e4de)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {!coverGrad && <span style={{ fontSize: 36, opacity: 0.25 }}>{page.icon}</span>}
                     </div>
-                    <div className="px-4 py-3.5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-base leading-none">{page.icon}</span>
-                        <p className="text-sm font-semibold text-[#1A1A1A] dark:text-white truncate">
-                          {page.title || "Untitled"}
-                        </p>
+                    <div style={{ padding: "12px 16px 14px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 15 }}>{page.icon}</span>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{page.title || "Untitled"}</p>
                       </div>
-                      <p className="text-xs text-[#9B9A97] dark:text-[#555]">{timeAgo(page.updatedAt)}</p>
+                      <p style={{ fontSize: 11, color: "var(--text3)", margin: 0 }}>{timeAgo(page.updatedAt)}</p>
                     </div>
                   </button>
                 );
@@ -162,26 +179,40 @@ function HomeDashboard({ pages, recentPageIds, onNew, onSearch, onTemplates }: {
         )}
 
         <section>
-          <p className="text-xs font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-widest mb-4">
+          <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text3)", marginBottom: 16 }}>
             Quick actions
           </p>
-          <div className="grid grid-cols-3 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
             {[
-              { icon: <FileText size={16} />, title: "New page", desc: "Start writing instantly", action: onNew },
-              { icon: <Search size={16} />, title: "Search", desc: "Find anything fast", action: onSearch },
-              { icon: <Layers size={16} />, title: "Templates", desc: "Start from a layout", action: onTemplates },
+              { icon: <FileText size={16} />, title: "New page",  desc: "Start writing instantly", action: onNew },
+              { icon: <Search size={16} />,   title: "Search",    desc: "Find anything fast",     action: onSearch },
+              { icon: <Layers size={16} />,   title: "Templates", desc: "Start from a layout",    action: onTemplates },
             ].map(({ icon, title, desc, action }) => (
               <button
                 key={title}
                 onClick={action}
-                className="flex items-center gap-4 p-5 rounded-2xl border border-black/[0.07] dark:border-white/[0.07] bg-white dark:bg-[#1E1E1E] hover:border-indigo-200 dark:hover:border-indigo-700/60 hover:shadow-md transition-all text-left group"
+                style={{
+                  display: "flex", alignItems: "center", gap: 16, padding: 20,
+                  borderRadius: 16, border: "1px solid var(--border)", background: "var(--surface)",
+                  cursor: "pointer", textAlign: "left", transition: "border-color 150ms, box-shadow 150ms",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = "#a5b4fc";
+                  el.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = "var(--border)";
+                  el.style.boxShadow = "none";
+                }}
               >
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] flex items-center justify-center text-[#5E5C58] dark:text-white/60 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors flex-shrink-0">
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: "var(--hover)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text2)", flexShrink: 0 }}>
                   {icon}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#1A1A1A] dark:text-white">{title}</p>
-                  <p className="text-xs text-[#9B9A97] dark:text-[#555] mt-0.5">{desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", margin: "0 0 2px" }}>{title}</p>
+                  <p style={{ fontSize: 12, color: "var(--text3)", margin: 0 }}>{desc}</p>
                 </div>
               </button>
             ))}
@@ -206,10 +237,10 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
   const { dark } = useSettingsStore();
   const activePage = activePageId ? pages[activePageId] : null;
 
-  const [localTitle, setLocalTitle] = useState(activePage?.title ?? "");
+  const [localTitle, setLocalTitle]             = useState(activePage?.title ?? "");
   const [localDescription, setLocalDescription] = useState(activePage?.description ?? "");
   const titleRef = useRef<HTMLTextAreaElement>(null);
-  const descRef = useRef<HTMLTextAreaElement>(null);
+  const descRef  = useRef<HTMLTextAreaElement>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useCreateBlockNote(
@@ -271,29 +302,30 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-white dark:bg-[#191919]">
-      {/* ── Scrollable column ─────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Cover — full width */}
+    <div style={{ flex: 1, display: "flex", overflow: "hidden", background: "var(--surface)" }}>
+      {/* Scrollable column */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
         <Cover pageId={activePage.id} cover={activePage.cover} />
 
-        {/* ── Centered content column (max-w forces breathing room) ───────── */}
         <div className="content-col">
-
           {/* Properties bar */}
-          <div className="border-b border-black/[0.06] dark:border-white/[0.06]">
-            <div className="content-body py-4">
+          <div style={{ borderBottom: "1px solid var(--border)" }}>
+            <div className="content-body" style={{ paddingTop: 12, paddingBottom: 12 }}>
               <PropertyPanel pageId={activePage.id} />
             </div>
           </div>
 
           {/* Page body */}
-          <div className="content-body pt-14 pb-40">
-            {/* Icon row */}
-            <div className="mb-5 flex items-end gap-3">
+          <div className="content-body" style={{ paddingTop: 56, paddingBottom: 160 }}>
+            {/* Icon + lock badge */}
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginBottom: 20 }}>
               <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
               {activePage.locked && (
-                <span className="mb-2 flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full border border-amber-200/60 dark:border-amber-700/40 font-medium">
+                <span style={{
+                  marginBottom: 8, display: "flex", alignItems: "center", gap: 6, fontSize: 11,
+                  color: "#92400e", background: "#fffbeb", padding: "3px 10px", borderRadius: 999,
+                  border: "1px solid #fde68a", fontWeight: 500,
+                }}>
                   <Lock size={9} /> Locked
                 </span>
               )}
@@ -302,8 +334,12 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
             {/* Title */}
             <textarea
               ref={titleRef}
-              className="w-full text-[42px] font-bold text-[#1A1A1A] dark:text-white resize-none border-none outline-none bg-transparent leading-tight mb-3 overflow-hidden tracking-tight"
-              style={{ letterSpacing: "-0.02em" }}
+              style={{
+                width: "100%", fontSize: 42, fontWeight: 700, color: "var(--text)",
+                resize: "none", border: "none", outline: "none", background: "transparent",
+                lineHeight: 1.2, marginBottom: 12, overflow: "hidden",
+                letterSpacing: "-0.02em", fontFamily: "inherit",
+              }}
               placeholder="Untitled"
               value={localTitle}
               onChange={handleTitleChange}
@@ -318,7 +354,11 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
             {/* Description */}
             <textarea
               ref={descRef}
-              className="w-full text-[17px] text-[#9B9A97] dark:text-[#666] resize-none border-none outline-none bg-transparent leading-relaxed mb-10 overflow-hidden"
+              style={{
+                width: "100%", fontSize: 17, color: "var(--text2)",
+                resize: "none", border: "none", outline: "none", background: "transparent",
+                lineHeight: 1.6, marginBottom: 40, overflow: "hidden", fontFamily: "inherit",
+              }}
               placeholder="Add a description..."
               value={localDescription}
               onChange={handleDescriptionChange}
@@ -339,10 +379,10 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
           </div>
 
           {/* Footer */}
-          <div className="border-t border-black/[0.05] dark:border-white/[0.05]">
-            <div className="content-body py-5 flex items-center justify-between">
+          <div style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="content-body" style={{ paddingTop: 20, paddingBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <WordCount editor={editor} />
-              <span className="text-[12px] text-[#C4C3BF] dark:text-[#444]">
+              <span style={{ fontSize: 12, color: "var(--text3)" }}>
                 Updated {new Date(activePage.updatedAt).toLocaleDateString()}
               </span>
             </div>

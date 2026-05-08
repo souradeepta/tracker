@@ -1,58 +1,65 @@
+import { useState } from "react";
 import { ChevronDown, Filter, MoreHorizontal, Plus, Search, SlidersHorizontal } from "lucide-react";
 import { usePageStore } from "../../store/pages";
 import { groupPagesByStatus } from "../../lib/kanban";
 import type { Page, PageStatus } from "../../types";
 
-const STATUS_CONFIG: Record<PageStatus, { label: string; pill: string }> = {
-  none:          { label: "No status",   pill: "bg-[#F3F2EF] text-[#787774] dark:bg-white/[0.06] dark:text-[#666]" },
-  todo:          { label: "Not started", pill: "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400" },
-  "in-progress": { label: "In progress", pill: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400" },
-  done:          { label: "Complete",    pill: "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400" },
+const STATUS_CFG: Record<PageStatus, { label: string; bg: string; color: string }> = {
+  none:          { label: "No status",   bg: "#F3F2EF", color: "#787774" },
+  todo:          { label: "Not started", bg: "#FEF2F2", color: "#DC2626" },
+  "in-progress": { label: "In progress", bg: "#EFF6FF", color: "#2563EB" },
+  done:          { label: "Complete",    bg: "#F0FDF4", color: "#16A34A" },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
-  high:   { label: "High 🔥", className: "bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-700/30" },
-  medium: { label: "Medium",  className: "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-700/30" },
-  low:    { label: "Low",     className: "bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-700/30" },
+const PRIORITY_CFG: Record<string, { label: string; bg: string; color: string; border: string }> = {
+  high:   { label: "High 🔥", bg: "#FFF1F2", color: "#BE123C", border: "#fecdd3" },
+  medium: { label: "Medium",  bg: "#FFF7ED", color: "#C2410C", border: "#fed7aa" },
+  low:    { label: "Low",     bg: "#F0F9FF", color: "#0369A1", border: "#bae6fd" },
 };
 
 function KanbanCard({ page }: { page: Page }) {
   const { setActive } = usePageStore();
 
   return (
-    <div
-      className="bg-white dark:bg-[#1E1E1E] border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] cursor-pointer transition-all group"
-      onClick={() => setActive(page.id)}
-    >
-      <div className="flex items-start gap-2.5 mb-3">
-        <span className="text-[18px] leading-tight flex-shrink-0 mt-0.5">{page.icon}</span>
-        <p className="flex-1 text-[14px] font-semibold text-[#1A1A1A] dark:text-white leading-snug line-clamp-2 min-h-[1.4em]">
-          {page.title || <span className="text-[#9B9A97] italic font-normal">Untitled</span>}
+    <div className="kanban-card" onClick={() => setActive(page.id)}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
+        <span style={{ fontSize: 18, lineHeight: 1, flexShrink: 0, marginTop: 2 }}>{page.icon}</span>
+        <p style={{
+          flex: 1, fontSize: 14, fontWeight: 600, color: "var(--text)", lineHeight: 1.4,
+          margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+        }}>
+          {page.title || <span style={{ color: "var(--text3)", fontStyle: "italic", fontWeight: 400 }}>Untitled</span>}
         </p>
         <button
           onClick={(e) => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.06] transition-all flex-shrink-0"
+          className="icon-btn"
+          style={{ width: 24, height: 24, borderRadius: 6, opacity: 0, transition: "opacity 150ms" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
         >
           <MoreHorizontal size={13} />
         </button>
       </div>
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        {page.priority !== "none" && (
-          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${PRIORITY_CONFIG[page.priority].className}`}>
-            {PRIORITY_CONFIG[page.priority].label}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {page.priority !== "none" && PRIORITY_CFG[page.priority] && (
+          <span style={{
+            fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 999,
+            background: PRIORITY_CFG[page.priority].bg,
+            color: PRIORITY_CFG[page.priority].color,
+            border: `1px solid ${PRIORITY_CFG[page.priority].border}`,
+          }}>
+            {PRIORITY_CFG[page.priority].label}
           </span>
         )}
         {page.tags.slice(0, 2).map((tag) => (
-          <span
-            key={tag}
-            className="text-[11px] bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700/30 px-1.5 py-0.5 rounded-full font-medium"
-          >
+          <span key={tag} style={{
+            fontSize: 11, fontWeight: 500, padding: "2px 8px", borderRadius: 999,
+            background: "#EEF2FF", color: "#4F46E5", border: "1px solid #C7D2FE",
+          }}>
             {tag}
           </span>
         ))}
         {page.tags.length > 2 && (
-          <span className="text-[11px] text-[#9B9A97] dark:text-[#555]">+{page.tags.length - 2}</span>
+          <span style={{ fontSize: 11, color: "var(--text3)" }}>+{page.tags.length - 2}</span>
         )}
       </div>
     </div>
@@ -60,37 +67,33 @@ function KanbanCard({ page }: { page: Page }) {
 }
 
 function Column({ status, pages, onAdd }: { status: PageStatus; pages: Page[]; onAdd: () => void }) {
-  const cfg = STATUS_CONFIG[status];
+  const cfg = STATUS_CFG[status];
   return (
-    <div className="flex flex-col w-[272px] flex-shrink-0 h-full">
-      <div className="flex items-center justify-between mb-3 px-0.5">
-        <div className="flex items-center gap-2">
-          <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full ${cfg.pill}`}>
+    <div style={{ display: "flex", flexDirection: "column", width: 272, flexShrink: 0, height: "100%" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, padding: "0 2px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 999, background: cfg.bg, color: cfg.color }}>
             {cfg.label}
           </span>
-          <span className="text-[13px] text-[#9B9A97] dark:text-[#555] font-medium">{pages.length}</span>
+          <span style={{ fontSize: 13, color: "var(--text3)", fontWeight: 500 }}>{pages.length}</span>
         </div>
-        <div className="flex items-center gap-0.5">
-          <button className="w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#EDECE9] dark:hover:bg-white/[0.05] transition-colors">
-            <MoreHorizontal size={13} />
-          </button>
-          <button
-            onClick={onAdd}
-            className="w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#EDECE9] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
-          >
-            <Plus size={13} />
-          </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <button className="icon-btn" style={{ width: 24, height: 24, borderRadius: 6 }}><MoreHorizontal size={13} /></button>
+          <button className="icon-btn" style={{ width: 24, height: 24, borderRadius: 6 }} onClick={onAdd}><Plus size={13} /></button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 overflow-y-auto flex-1 pb-2">
-        {pages
-          .sort((a, b) => b.updatedAt - a.updatedAt)
-          .map((page) => <KanbanCard key={page.id} page={page} />)}
-
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto", flex: 1, paddingBottom: 8 }}>
+        {pages.sort((a, b) => b.updatedAt - a.updatedAt).map((page) => <KanbanCard key={page.id} page={page} />)}
         <button
           onClick={onAdd}
-          className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-[#9B9A97] dark:text-[#555] hover:text-[#1A1A1A] dark:hover:text-white hover:bg-[#EDECE9] dark:hover:bg-white/[0.04] transition-colors mt-1"
+          style={{
+            display: "flex", alignItems: "center", gap: 8, padding: "8px 8px", borderRadius: 8,
+            fontSize: 13, color: "var(--text3)", background: "transparent", border: "none", cursor: "pointer",
+            marginTop: 4, transition: "background 100ms, color 100ms",
+          }}
+          onMouseEnter={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--hover)"; el.style.color = "var(--text)"; }}
+          onMouseLeave={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "transparent"; el.style.color = "var(--text3)"; }}
         >
           <Plus size={14} /> New
         </button>
@@ -101,6 +104,7 @@ function Column({ status, pages, onAdd }: { status: PageStatus; pages: Page[]; o
 
 export function KanbanBoard() {
   const { pages, createPage, setStatus } = usePageStore();
+  const [_filterOpen, setFilterOpen] = useState(false);
   const livePages = Object.values(pages).filter((p) => !p.deleted);
   const columns = groupPagesByStatus(livePages);
 
@@ -110,52 +114,88 @@ export function KanbanBoard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-[#191919]">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--surface)" }}>
       {/* Toolbar */}
-      <div className="h-11 flex items-center gap-1 px-6 border-b border-black/[0.06] dark:border-white/[0.06] flex-shrink-0">
-        <button className="flex items-center gap-1.5 text-[13px] font-medium text-[#1A1A1A] dark:text-white px-2.5 py-1.5 rounded-lg hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] transition-colors">
-          <SlidersHorizontal size={13} className="text-[#9B9A97]" />
+      <div style={{ height: 44, display: "flex", alignItems: "center", gap: 4, padding: "0 24px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+        <button
+          style={{
+            display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 500,
+            color: "var(--text)", padding: "6px 10px", borderRadius: 8, background: "transparent",
+            border: "none", cursor: "pointer", transition: "background 100ms",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--hover)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+        >
+          <SlidersHorizontal size={13} style={{ color: "var(--text2)" }} />
           By Status
-          <ChevronDown size={11} className="text-[#9B9A97]" />
+          <ChevronDown size={11} style={{ color: "var(--text2)" }} />
         </button>
 
-        <div className="w-px h-4 bg-black/[0.08] dark:bg-white/[0.08] mx-1" />
+        <div style={{ width: 1, height: 16, background: "var(--border)", margin: "0 4px" }} />
 
-        {(["Properties", "Group by Status", "Filter", "Sort"] as const).map((label) => (
+        {(["Properties", "Group by Status", "Sort"] as const).map((label) => (
           <button
             key={label}
-            className="flex items-center gap-1.5 text-[13px] text-[#9B9A97] dark:text-[#555] hover:text-[#1A1A1A] dark:hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] transition-colors"
+            style={{
+              display: "flex", alignItems: "center", gap: 6, fontSize: 13,
+              color: "var(--text2)", padding: "6px 10px", borderRadius: 8,
+              background: "transparent", border: "none", cursor: "pointer", transition: "background 100ms, color 100ms",
+            }}
+            onMouseEnter={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--hover)"; el.style.color = "var(--text)"; }}
+            onMouseLeave={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "transparent"; el.style.color = "var(--text2)"; }}
           >
-            {label === "Filter" && <Filter size={11} />}
             {label}
           </button>
         ))}
-
-        <div className="flex-1" />
-
-        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors">
-          <Search size={13} />
+        <button
+          onClick={() => setFilterOpen((v) => !v)}
+          style={{
+            display: "flex", alignItems: "center", gap: 6, fontSize: 13,
+            color: "var(--text2)", padding: "6px 10px", borderRadius: 8,
+            background: "transparent", border: "none", cursor: "pointer", transition: "background 100ms, color 100ms",
+          }}
+          onMouseEnter={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--hover)"; el.style.color = "var(--text)"; }}
+          onMouseLeave={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "transparent"; el.style.color = "var(--text2)"; }}
+        >
+          <Filter size={11} /> Filter
         </button>
-        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors">
-          <MoreHorizontal size={13} />
-        </button>
 
-        <div className="flex items-center ml-1">
+        <div style={{ flex: 1 }} />
+
+        <button className="icon-btn" style={{ width: 28, height: 28, borderRadius: 8 }}><Search size={13} /></button>
+        <button className="icon-btn" style={{ width: 28, height: 28, borderRadius: 8 }}><MoreHorizontal size={13} /></button>
+
+        <div style={{ display: "flex", alignItems: "center", marginLeft: 4 }}>
           <button
             onClick={() => createPage(null)}
-            className="flex items-center gap-1.5 bg-[#2383E2] hover:bg-[#1a73d6] text-white text-[13px] font-medium px-3 py-1.5 rounded-l-lg transition-colors"
+            style={{
+              display: "flex", alignItems: "center", gap: 6, background: "#2383E2", color: "#fff",
+              fontSize: 13, fontWeight: 500, padding: "6px 12px", borderRadius: "8px 0 0 8px",
+              border: "none", cursor: "pointer",
+              transition: "background 100ms",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#1a73d6"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#2383E2"; }}
           >
             New
           </button>
-          <button className="bg-[#2383E2] hover:bg-[#1a73d6] text-white px-1.5 py-1.5 rounded-r-lg border-l border-white/20 transition-colors">
+          <button
+            style={{
+              background: "#2383E2", color: "#fff", padding: "6px 6px", borderRadius: "0 8px 8px 0",
+              borderLeft: "1px solid rgba(255,255,255,0.2)", border: "none", cursor: "pointer",
+              transition: "background 100ms",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#1a73d6"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#2383E2"; }}
+          >
             <ChevronDown size={12} />
           </button>
         </div>
       </div>
 
       {/* Columns */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F9F9F7] dark:bg-[#111111]">
-        <div className="flex gap-5 p-8 h-full min-w-max items-start">
+      <div style={{ flex: 1, overflowX: "auto", overflowY: "hidden", background: "var(--surface2)" }}>
+        <div style={{ display: "flex", gap: 20, padding: 32, height: "100%", minWidth: "max-content", alignItems: "flex-start" }}>
           {columns.map((col) => (
             <Column
               key={col.status}
