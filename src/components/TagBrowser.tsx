@@ -2,16 +2,13 @@ import React from "react";
 import { X, Tag } from "lucide-react";
 import { usePageStore } from "../store/pages";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
+interface Props { open: boolean; onClose: () => void; }
 
 export function TagBrowser({ open, onClose }: Props) {
   const { pages, getAllTags, setActive } = usePageStore();
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
 
-  const allTags = getAllTags();
+  const allTags    = getAllTags();
   const taggedPages = selectedTag
     ? Object.values(pages).filter((p) => !p.deleted && p.tags.includes(selectedTag))
     : [];
@@ -19,38 +16,57 @@ export function TagBrowser({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 50,
+        display: "flex", alignItems: "flex-start", justifyContent: "center",
+        paddingTop: 80, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)",
+      }}
+    >
       <div
-        className="w-full max-w-2xl bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 600, background: "var(--surface)",
+          borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+          border: "1px solid var(--border)", overflow: "hidden",
+        }}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F0EFEC] dark:border-[#2D2D2D]">
-          <div className="flex items-center gap-2">
-            <Tag size={15} className="text-[#9B9A97]" />
-            <h2 className="text-sm font-semibold text-[#37352F] dark:text-white">Tag Browser</h2>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Tag size={15} style={{ color: "var(--text2)" }} />
+            <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", margin: 0 }}>Tag Browser</h2>
           </div>
-          <button onClick={onClose} className="text-[#9B9A97] hover:text-[#37352F] dark:hover:text-white transition-colors"><X size={15} /></button>
+          <button className="icon-btn" onClick={onClose} style={{ width: 28, height: 28, borderRadius: 8 }}><X size={15} /></button>
         </div>
 
-        <div className="flex" style={{ minHeight: 320 }}>
+        <div style={{ display: "flex", minHeight: 320 }}>
           {/* Tag list */}
-          <div className="w-48 border-r border-[#F0EFEC] dark:border-[#2D2D2D] py-2 overflow-y-auto">
+          <div style={{ width: 192, borderRight: "1px solid var(--border)", padding: "8px 0", overflowY: "auto" }}>
             {allTags.length === 0 ? (
-              <p className="text-xs text-gray-400 dark:text-neutral-600 px-4 py-2">No tags yet</p>
+              <p style={{ fontSize: 12, color: "var(--text3)", padding: "8px 16px", margin: 0 }}>No tags yet</p>
             ) : (
               allTags.map((tag) => {
                 const count = Object.values(pages).filter((p) => !p.deleted && p.tags.includes(tag)).length;
+                const isSelected = tag === selectedTag;
                 return (
                   <button
                     key={tag}
                     onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                    className={`w-full flex items-center justify-between px-4 py-2 text-left text-sm transition-colors
-                      ${tag === selectedTag
-                        ? "bg-[#37352F]/[0.08] dark:bg-white/[0.07] text-[#37352F] dark:text-white font-medium"
-                        : "text-[#37352F]/70 dark:text-white/50 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04]"}`}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "8px 16px", textAlign: "left", fontSize: 13, border: "none", cursor: "pointer",
+                      background: isSelected ? "var(--active)" : "transparent",
+                      color: isSelected ? "var(--text)" : "var(--text2)",
+                      fontWeight: isSelected ? 500 : 400,
+                      transition: "background 80ms, color 80ms",
+                    }}
+                    onMouseEnter={(e) => { if (!isSelected) { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--hover)"; el.style.color = "var(--text)"; } }}
+                    onMouseLeave={(e) => { if (!isSelected) { const el = e.currentTarget as HTMLButtonElement; el.style.background = "transparent"; el.style.color = "var(--text2)"; } }}
                   >
-                    <span className="truncate">{tag}</span>
-                    <span className="text-xs text-[#9B9A97] dark:text-[#6B6B6B] ml-2 flex-shrink-0">{count}</span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tag}</span>
+                    <span style={{ fontSize: 11, color: "var(--text3)", marginLeft: 8, flexShrink: 0 }}>{count}</span>
                   </button>
                 );
               })
@@ -58,24 +74,30 @@ export function TagBrowser({ open, onClose }: Props) {
           </div>
 
           {/* Pages for selected tag */}
-          <div className="flex-1 py-2 overflow-y-auto">
+          <div style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
             {!selectedTag ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-sm text-gray-400 dark:text-neutral-600">Select a tag to see pages</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                <p style={{ fontSize: 13, color: "var(--text3)", margin: 0 }}>Select a tag to see pages</p>
               </div>
             ) : taggedPages.length === 0 ? (
-              <p className="text-sm text-gray-400 px-4 py-2">No pages with this tag</p>
+              <p style={{ fontSize: 13, color: "var(--text3)", padding: "8px 16px", margin: 0 }}>No pages with this tag</p>
             ) : (
               taggedPages.map((page) => (
                 <button
                   key={page.id}
                   onClick={() => { setActive(page.id); onClose(); }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04]"
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "8px 16px",
+                    textAlign: "left", border: "none", cursor: "pointer", background: "transparent",
+                    transition: "background 80ms",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--hover)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                 >
-                  <span className="text-lg">{page.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-[#37352F] dark:text-white truncate">{page.title || "Untitled"}</p>
-                    <p className="text-xs text-[#9B9A97] dark:text-[#6B6B6B]">{page.status !== "none" ? page.status : ""}</p>
+                  <span style={{ fontSize: 18 }}>{page.icon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 13, color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{page.title || "Untitled"}</p>
+                    {page.status !== "none" && <p style={{ fontSize: 11, color: "var(--text3)", margin: 0 }}>{page.status}</p>}
                   </div>
                 </button>
               ))

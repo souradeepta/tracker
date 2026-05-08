@@ -19,20 +19,48 @@ export function QuickCapture() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-[#37352F] hover:bg-[#2F2C27] dark:bg-white/80 dark:hover:bg-white
-          text-white dark:text-[#191919] shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
         title="Quick capture"
+        style={{
+          position: "fixed", bottom: 24, right: 24, zIndex: 40,
+          width: 44, height: 44, borderRadius: "50%",
+          background: "#1A1A1A", color: "#fff",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.20)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: "none", cursor: "pointer",
+          transition: "transform 120ms, box-shadow 120ms",
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLButtonElement;
+          el.style.transform = "scale(1.07)";
+          el.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25)";
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLButtonElement;
+          el.style.transform = "scale(1)";
+          el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.20)";
+        }}
       >
         <Plus size={20} />
       </button>
 
-      {/* Capture popover */}
+      {/* Popover */}
       {open && (
-        <div className="fixed bottom-20 right-6 z-50 bg-white dark:bg-[#252525] rounded-2xl shadow-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] w-80 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={14} className="text-[#9B9A97]" />
-            <span className="text-[11px] font-semibold text-[#9B9A97] dark:text-[#6B6B6B] uppercase tracking-wide">Quick capture</span>
-            <button onClick={() => setOpen(false)} className="ml-auto text-[#9B9A97] hover:text-[#37352F] dark:hover:text-white transition-colors"><X size={13} /></button>
+        <div
+          style={{
+            position: "fixed", bottom: 80, right: 24, zIndex: 50,
+            background: "var(--surface)", borderRadius: 16,
+            boxShadow: "0 16px 48px rgba(0,0,0,0.16)",
+            border: "1px solid var(--border)", width: 320, padding: 16,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <Zap size={14} style={{ color: "var(--text3)" }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.07em", flex: 1 }}>
+              Quick capture
+            </span>
+            <button className="icon-btn" style={{ width: 20, height: 20, borderRadius: 4 }} onClick={() => setOpen(false)}>
+              <X size={13} />
+            </button>
           </div>
 
           <input
@@ -44,20 +72,40 @@ export function QuickCapture() {
               if (e.key === "Escape") setOpen(false);
             }}
             placeholder="Page title… (Enter to create)"
-            className="w-full text-[13px] border border-[#E9E9E8] dark:border-[#3A3A3A] rounded-lg px-3 py-2 outline-none
-              focus:border-[#37352F]/30 dark:focus:border-white/20 bg-transparent text-[#37352F] dark:text-white placeholder-[#C4C3BF] dark:placeholder-[#444444]"
+            style={{
+              width: "100%", fontSize: 13, border: "1px solid var(--border)",
+              borderRadius: 8, padding: "8px 12px", outline: "none",
+              background: "var(--hover)", color: "var(--text)",
+              fontFamily: "inherit", transition: "border-color 150ms",
+              boxSizing: "border-box",
+            }}
+            onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#6366f1"; }}
+            onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border)"; }}
           />
 
-          <div className="flex gap-2 mt-3">
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button
               onClick={handleCapture}
-              className="flex-1 bg-[#37352F] hover:bg-[#2F2C27] dark:bg-white dark:hover:bg-white/90 text-white dark:text-[#191919] text-[12px] font-medium py-2 rounded-lg transition-colors"
+              style={{
+                flex: 1, background: "#1A1A1A", color: "#fff",
+                fontSize: 12, fontWeight: 500, padding: "8px 0",
+                borderRadius: 8, border: "none", cursor: "pointer",
+                transition: "background 100ms",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#333"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#1A1A1A"; }}
             >
               Create page
             </button>
             <button
               onClick={() => setOpen(false)}
-              className="px-3 py-2 text-[12px] text-[#9B9A97] hover:text-[#37352F] dark:hover:text-white transition-colors"
+              style={{
+                padding: "8px 14px", fontSize: 12, color: "var(--text2)",
+                background: "transparent", border: "none", cursor: "pointer", borderRadius: 8,
+                transition: "color 100ms",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--text)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--text2)"; }}
             >
               Cancel
             </button>

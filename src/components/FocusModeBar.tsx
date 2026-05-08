@@ -2,9 +2,7 @@ import { X, Lock, Unlock, Download } from "lucide-react";
 import { useSettingsStore } from "../store/settings";
 import { usePageStore } from "../store/pages";
 
-interface Props {
-  onExport: (id: string) => void;
-}
+interface Props { onExport: (id: string) => void; }
 
 export function FocusModeBar({ onExport }: Props) {
   const { toggleFocusMode } = useSettingsStore();
@@ -12,44 +10,49 @@ export function FocusModeBar({ onExport }: Props) {
   const page = activePageId ? pages[activePageId] : null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-2.5 bg-white/90 dark:bg-[#191919]/90 backdrop-blur-xl border-b border-[#E9E9E8] dark:border-[#2D2D2D]">
-      <div className="flex items-center gap-2.5">
-        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
-          <span className="text-white text-[10px] font-bold">T</span>
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "0 32px", height: 44,
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)",
+      borderBottom: "1px solid var(--border)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 24, height: 24, borderRadius: 7, background: "linear-gradient(135deg,#6366f1,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: "#fff", fontSize: 10, fontWeight: 700 }}>T</span>
         </div>
         {page && (
           <>
-            <span className="text-gray-300 dark:text-gray-700">/</span>
-            <span className="text-[15px]">{page.icon}</span>
-            <span className="text-[13px] font-medium text-gray-800 dark:text-gray-100 max-w-xs truncate">
+            <span style={{ color: "var(--text3)" }}>/</span>
+            <span style={{ fontSize: 15 }}>{page.icon}</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text)", maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {page.title || "Untitled"}
             </span>
           </>
         )}
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         {page && (
           <>
-            <button
-              onClick={() => toggleLocked(page.id)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors"
-              title={page.locked ? "Unlock page" : "Lock page"}
-            >
+            <button className="icon-btn" style={{ width: 32, height: 32, borderRadius: 10 }} onClick={() => toggleLocked(page.id)} title={page.locked ? "Unlock page" : "Lock page"}>
               {page.locked ? <Unlock size={14} /> : <Lock size={14} />}
             </button>
-            <button
-              onClick={() => onExport(page.id)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors"
-              title="Export as Markdown"
-            >
+            <button className="icon-btn" style={{ width: 32, height: 32, borderRadius: 10 }} onClick={() => onExport(page.id)} title="Export as Markdown">
               <Download size={14} />
             </button>
           </>
         )}
         <button
           onClick={toggleFocusMode}
-          className="flex items-center gap-1.5 text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white bg-[#EBEBEA] dark:bg-white/[0.05] hover:bg-[#E4E3DF] dark:hover:bg-white/[0.08] rounded-xl px-3 py-1.5 font-medium transition-colors"
+          style={{
+            display: "flex", alignItems: "center", gap: 6, fontSize: 12,
+            fontWeight: 500, color: "var(--text2)", background: "var(--hover)",
+            border: "none", borderRadius: 10, padding: "6px 12px", cursor: "pointer",
+            transition: "background 100ms, color 100ms",
+          }}
+          onMouseEnter={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--active)"; el.style.color = "var(--text)"; }}
+          onMouseLeave={(e) => { const el = e.currentTarget as HTMLButtonElement; el.style.background = "var(--hover)"; el.style.color = "var(--text2)"; }}
           title="Exit focus mode (⌘⇧F)"
         >
           <X size={12} /> Exit focus

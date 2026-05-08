@@ -1,14 +1,11 @@
 import { X, Keyboard } from "lucide-react";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
+interface Props { open: boolean; onClose: () => void; }
 
 const SHORTCUTS = [
   {
     group: "Navigation",
-    color: "from-indigo-500 to-violet-500",
+    color: "#6366f1",
     items: [
       { keys: ["⌘", "K"], label: "Search all pages" },
       { keys: ["⌘", "N"], label: "New page" },
@@ -18,7 +15,7 @@ const SHORTCUTS = [
   },
   {
     group: "Panels",
-    color: "from-violet-500 to-purple-600",
+    color: "#8b5cf6",
     items: [
       { keys: ["⌘", "⇧", "T"], label: "Template gallery" },
       { keys: ["⌘", "⇧", "G"], label: "Tag browser" },
@@ -28,7 +25,7 @@ const SHORTCUTS = [
   },
   {
     group: "Editing",
-    color: "from-blue-500 to-cyan-500",
+    color: "#3b82f6",
     items: [
       { keys: ["/"], label: "Insert block (heading, list, code…)" },
       { keys: ["Enter"], label: "Focus editor from title" },
@@ -38,7 +35,7 @@ const SHORTCUTS = [
   },
   {
     group: "Page actions",
-    color: "from-green-500 to-emerald-500",
+    color: "#22c55e",
     items: [
       { keys: ["Right-click"], label: "Context menu (duplicate, delete…)" },
       { keys: ["⌘", "⇧", "L"], label: "Lock / unlock page" },
@@ -51,49 +48,59 @@ export function ShortcutsModal({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
       onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 50,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)",
+      }}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/60 border border-gray-200 dark:border-gray-700/60 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 480, background: "var(--surface)",
+          borderRadius: 20, boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+          border: "1px solid var(--border)", overflow: "hidden",
+        }}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm">
-            <Keyboard size={14} className="text-white" />
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 24px", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Keyboard size={14} style={{ color: "#fff" }} />
           </div>
-          <div className="flex-1">
-            <h2 className="text-[15px] font-semibold text-gray-900 dark:text-gray-50">Keyboard shortcuts</h2>
-            <p className="text-[11px] text-gray-400 dark:text-gray-600">Press Esc or click outside to close</p>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", margin: 0 }}>Keyboard shortcuts</h2>
+            <p style={{ fontSize: 11, color: "var(--text3)", margin: 0 }}>Press Esc or click outside to close</p>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-          >
+          <button className="icon-btn" onClick={onClose} style={{ width: 32, height: 32, borderRadius: 10 }}>
             <X size={14} />
           </button>
         </div>
 
-        {/* Shortcuts */}
-        <div className="p-5 grid grid-cols-1 gap-5 max-h-[60vh] overflow-y-auto">
+        {/* Shortcuts list */}
+        <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 20, maxHeight: "60vh", overflowY: "auto" }}>
           {SHORTCUTS.map((group) => (
             <div key={group.group}>
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className={`w-1.5 h-4 rounded-full bg-gradient-to-b ${group.color}`} />
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-500">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <div style={{ width: 3, height: 16, borderRadius: 99, background: group.color }} />
+                <p style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text3)", margin: 0 }}>
                   {group.group}
                 </p>
               </div>
-              <div className="space-y-1.5 ml-4">
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingLeft: 16 }}>
                 {group.items.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between gap-4">
-                    <span className="text-[13px] text-gray-600 dark:text-gray-400">{item.label}</span>
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                  <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                    <span style={{ fontSize: 13, color: "var(--text2)" }}>{item.label}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
                       {item.keys.map((key, i) => (
                         <kbd
                           key={i}
-                          className="px-2 py-1 text-[11px] font-mono bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
+                          style={{
+                            padding: "3px 7px", fontSize: 11, fontFamily: "monospace",
+                            background: "var(--hover)", color: "var(--text2)",
+                            borderRadius: 6, border: "1px solid var(--border)",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                          }}
                         >
                           {key}
                         </kbd>

@@ -2,77 +2,88 @@ import { X, Sparkles } from "lucide-react";
 import { TEMPLATES } from "../lib/templates";
 import { usePageStore } from "../store/pages";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
+interface Props { open: boolean; onClose: () => void; }
 
-const TEMPLATE_COLORS: Record<string, string> = {
-  "meeting-notes": "from-blue-500 to-cyan-500",
-  "daily-journal": "from-violet-500 to-purple-600",
-  "project-plan": "from-indigo-500 to-blue-600",
-  "bug-report": "from-red-500 to-orange-500",
-  "reading-notes": "from-amber-500 to-yellow-500",
-  "weekly-review": "from-green-500 to-emerald-600",
+const TEMPLATE_GRADIENTS: Record<string, string> = {
+  "meeting-notes":  "linear-gradient(135deg,#3b82f6,#06b6d4)",
+  "daily-journal":  "linear-gradient(135deg,#8b5cf6,#7c3aed)",
+  "project-plan":   "linear-gradient(135deg,#6366f1,#3b82f6)",
+  "bug-report":     "linear-gradient(135deg,#ef4444,#f97316)",
+  "reading-notes":  "linear-gradient(135deg,#f59e0b,#eab308)",
+  "weekly-review":  "linear-gradient(135deg,#22c55e,#10b981)",
 };
 
 export function TemplatesModal({ open, onClose }: Props) {
   const { createFromTemplate } = usePageStore();
-
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
       onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 50,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(0,0,0,0.45)", backdropFilter: "blur(6px)",
+      }}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/60 border border-gray-200 dark:border-gray-700/60 w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "var(--surface)", borderRadius: 20,
+          boxShadow: "0 24px 64px rgba(0,0,0,0.18)",
+          border: "1px solid var(--border)",
+          width: "100%", maxWidth: 640, maxHeight: "80vh",
+          overflow: "hidden", display: "flex", flexDirection: "column",
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm">
-              <Sparkles size={14} className="text-white" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#6366f1,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Sparkles size={14} style={{ color: "#fff" }} />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-gray-900 dark:text-gray-50">Templates</h2>
-              <p className="text-[11px] text-gray-400 dark:text-gray-600">Choose a template to get started quickly</p>
+              <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", margin: 0 }}>Templates</h2>
+              <p style={{ fontSize: 11, color: "var(--text3)", margin: 0 }}>Choose a template to get started quickly</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-          >
+          <button className="icon-btn" onClick={onClose} style={{ width: 32, height: 32, borderRadius: 10 }}>
             <X size={14} />
           </button>
         </div>
 
-        {/* Templates grid */}
-        <div className="overflow-y-auto p-5 grid grid-cols-2 gap-3">
+        {/* Grid */}
+        <div style={{ overflowY: "auto", padding: 20, display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12 }}>
           {TEMPLATES.map((tpl) => {
-            const gradient = TEMPLATE_COLORS[tpl.key] ?? "from-gray-400 to-gray-600";
+            const gradient = TEMPLATE_GRADIENTS[tpl.key] ?? "linear-gradient(135deg,#9ca3af,#6b7280)";
             return (
               <button
                 key={tpl.key}
-                className="group text-left p-4 rounded-2xl border border-gray-200 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-700/60 bg-white dark:bg-gray-800/50 hover:shadow-md hover:shadow-indigo-100/60 dark:hover:shadow-indigo-900/20 transition-all"
                 onClick={() => { createFromTemplate(tpl.key); onClose(); }}
+                style={{
+                  textAlign: "left", padding: 16, borderRadius: 16,
+                  border: "1px solid var(--border)", background: "var(--surface)",
+                  cursor: "pointer", transition: "border-color 150ms, box-shadow 150ms",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = "#a5b4fc";
+                  el.style.boxShadow = "0 4px 16px rgba(99,102,241,0.12)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement;
+                  el.style.borderColor = "var(--border)";
+                  el.style.boxShadow = "none";
+                }}
               >
-                <div className="flex items-center gap-3 mb-2.5">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-xl shadow-sm flex-shrink-0`}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: gradient, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
                     {tpl.icon}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                      {tpl.name}
-                    </p>
-                  </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", margin: 0 }}>{tpl.name}</p>
                 </div>
-                <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed">{tpl.description}</p>
-                <div className="mt-3 flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  Use template →
-                </div>
+                <p style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.5, margin: "0 0 12px" }}>{tpl.description}</p>
+                <span style={{ fontSize: 11, color: "#6366f1", fontWeight: 500 }}>Use template →</span>
               </button>
             );
           })}
