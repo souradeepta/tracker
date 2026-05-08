@@ -3,8 +3,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import type { PartialBlock } from "@blocknote/core";
 import {
-  Lock, Unlock, Clock, FileText, Layers, Search, Keyboard,
-  LayoutGrid, Zap, Tag, Star, Download, ChevronRight,
+  Lock, Clock, FileText, Layers, Search, Keyboard, LayoutGrid, Zap, Tag,
 } from "lucide-react";
 import { usePageStore } from "../store/pages";
 import { useSettingsStore } from "../store/settings";
@@ -12,7 +11,6 @@ import { estimateReadingTime } from "../lib/readingTime";
 import { Cover } from "./Cover";
 import { TableOfContents } from "./TableOfContents";
 import { PropertyPanel } from "./PropertyPanel";
-import type { Page } from "../types";
 
 const EMOJI_OPTIONS = [
   "📄","📝","📌","🗒️","📋","🔖","💡","🎯","📚","🗂️","🏠","⭐","🔥","✅","💼",
@@ -82,64 +80,6 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   );
 }
 
-// ─── Page header bar (breadcrumb + actions) ──────────────────────────────────
-function PageHeader({ page, onExport }: { page: Page; onExport: (id: string) => void }) {
-  const { pages, setActive, toggleFavorite, toggleLocked } = usePageStore();
-
-  const chain: { id: string; title: string; icon: string }[] = [];
-  let cur: Page | null = page;
-  while (cur) {
-    chain.unshift({ id: cur.id, title: cur.title, icon: cur.icon });
-    cur = cur.parentId ? (pages[cur.parentId] ?? null) : null;
-  }
-
-  const btnCls = "w-7 h-7 flex items-center justify-center rounded-md text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors";
-
-  return (
-    <div className="flex items-center justify-between px-4 h-10 border-b border-[#E9E9E8] dark:border-[#2D2D2D] flex-shrink-0 bg-white dark:bg-[#191919]">
-      <nav className="flex items-center min-w-0 overflow-hidden">
-        {chain.map((item, i) => (
-          <React.Fragment key={item.id}>
-            {i > 0 && <ChevronRight size={11} className="flex-shrink-0 text-[#C4C3BF] dark:text-[#444444] mx-0.5" />}
-            <button
-              onClick={() => setActive(item.id)}
-              className={`flex items-center gap-1 text-[12px] hover:text-[#37352F] dark:hover:text-white transition-colors truncate
-                ${i === chain.length - 1 ? "text-[#37352F] dark:text-white font-medium" : "text-[#9B9A97] dark:text-[#6B6B6B]"}`}
-            >
-              <span className="text-[13px] flex-shrink-0">{item.icon}</span>
-              <span className="truncate max-w-[140px]">{item.title || "Untitled"}</span>
-            </button>
-          </React.Fragment>
-        ))}
-      </nav>
-
-      <div className="flex items-center gap-0.5 flex-shrink-0 ml-4">
-        <button
-          onClick={() => toggleFavorite(page.id)}
-          className={`${btnCls} ${page.favorited ? "text-amber-400 dark:text-amber-400" : ""}`}
-          title={page.favorited ? "Remove from favorites" : "Add to favorites"}
-        >
-          <Star size={13} fill={page.favorited ? "currentColor" : "none"} />
-        </button>
-        <button
-          onClick={() => toggleLocked(page.id)}
-          className={btnCls}
-          title={page.locked ? "Unlock page" : "Lock page"}
-        >
-          {page.locked ? <Unlock size={13} /> : <Lock size={13} />}
-        </button>
-        <button
-          onClick={() => onExport(page.id)}
-          className={btnCls}
-          title="Export as Markdown"
-        >
-          <Download size={13} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Feature card in empty state ─────────────────────────────────────────────
 function FeatureCard({
   icon, title, desc, shortcut, onClick,
@@ -153,21 +93,21 @@ function FeatureCard({
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-start gap-2 p-4 rounded-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#252525] hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md hover:shadow-indigo-100 dark:hover:shadow-indigo-900/20 transition-all text-left"
+      className="group flex flex-col items-start gap-2.5 p-5 rounded-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#1F1F1F] hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md hover:shadow-black/5 transition-all text-left"
     >
-      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors flex-shrink-0">
         {icon}
       </div>
       <div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-0.5">
           <p className="text-[13px] font-semibold text-[#37352F] dark:text-white">{title}</p>
           {shortcut && (
-            <kbd className="text-[10px] font-mono bg-[#F0EFEC] dark:bg-[#2A2A2A] text-[#9B9A97] dark:text-[#6B6B6B] px-1.5 py-0.5 rounded-lg border border-[#E9E9E8] dark:border-[#3A3A3A]">
+            <kbd className="text-[10px] font-mono bg-[#F4F3F0] dark:bg-[#2A2A2A] text-[#9B9A97] dark:text-[#6B6B6B] px-1.5 py-0.5 rounded border border-[#E9E9E8] dark:border-[#3A3A3A]">
               {shortcut}
             </kbd>
           )}
         </div>
-        <p className="text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] mt-0.5">{desc}</p>
+        <p className="text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] leading-snug">{desc}</p>
       </div>
     </button>
   );
@@ -183,79 +123,45 @@ function EmptyState({
   onShortcuts: () => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-[#191919] overflow-y-auto py-12 px-6">
-      <div className="w-full max-w-2xl">
-        {/* Hero */}
+    <div className="flex-1 flex flex-col items-center justify-center bg-[#F4F3F0] dark:bg-[#141414] overflow-y-auto py-16 px-8">
+      <div className="w-full max-w-xl">
         <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/40">
-            <span className="text-white text-3xl font-bold">T</span>
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200/60 dark:shadow-indigo-900/30">
+            <span className="text-white text-2xl font-bold">T</span>
           </div>
-          <h1 className="text-[28px] font-bold text-[#37352F] dark:text-white tracking-tight mb-2">
+          <h1 className="text-[26px] font-bold text-[#37352F] dark:text-white tracking-tight mb-2">
             Welcome to Tracker
           </h1>
-          <p className="text-[15px] text-[#9B9A97] dark:text-[#6B6B6B] max-w-sm mx-auto">
-            Your all-in-one workspace for notes, tasks, and knowledge.
+          <p className="text-[14px] text-[#9B9A97] dark:text-[#6B6B6B]">
+            Your workspace for notes, tasks, and knowledge.
           </p>
         </div>
 
-        {/* Feature cards */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          <FeatureCard
-            icon={<FileText size={18} />}
-            title="New page"
-            desc="Create a blank page and start writing"
-            shortcut="⌘N"
-            onClick={onNew}
-          />
-          <FeatureCard
-            icon={<Search size={18} />}
-            title="Search"
-            desc="Jump to any page instantly"
-            shortcut="⌘K"
-            onClick={onSearch}
-          />
-          <FeatureCard
-            icon={<Layers size={18} />}
-            title="Templates"
-            desc="Start from a meeting, project, or daily note"
-            shortcut="⌘⇧T"
-            onClick={onTemplates}
-          />
-          <FeatureCard
-            icon={<LayoutGrid size={18} />}
-            title="Board view"
-            desc="Manage pages by status on a Kanban board"
-            shortcut="⌘⇧B"
-            onClick={() => {}}
-          />
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <FeatureCard icon={<FileText size={16} />} title="New page" desc="Create a blank page and start writing" shortcut="⌘N" onClick={onNew} />
+          <FeatureCard icon={<Search size={16} />} title="Search" desc="Jump to any page instantly" shortcut="⌘K" onClick={onSearch} />
+          <FeatureCard icon={<Layers size={16} />} title="Templates" desc="Start from a pre-built layout" shortcut="⌘⇧T" onClick={onTemplates} />
+          <FeatureCard icon={<LayoutGrid size={16} />} title="Board view" desc="Track pages by status" shortcut="⌘⇧B" onClick={() => {}} />
         </div>
 
-        {/* Shortcut reference */}
-        <div className="rounded-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#252525] overflow-hidden mb-6">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#F0EFEC] dark:border-[#2D2D2D]">
+        <div className="bg-white dark:bg-[#1F1F1F] rounded-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#F4F3F0] dark:border-[#2D2D2D]">
             <p className="text-[12px] font-semibold text-[#37352F] dark:text-white flex items-center gap-2">
-              <Keyboard size={13} className="text-indigo-500" />
-              Keyboard shortcuts
+              <Keyboard size={12} className="text-indigo-500" /> Keyboard shortcuts
             </p>
-            <button
-              onClick={onShortcuts}
-              className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
-            >
+            <button onClick={onShortcuts} className="text-[11px] text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium transition-colors">
               View all →
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 p-5">
+          <div className="grid grid-cols-2 gap-y-2 p-5">
             {[
-              ["⌘ ⇧ F", "Focus mode"],
-              ["⌘ ⇧ G", "Tag browser"],
-              ["⌘ ⇧ D", "Dark mode"],
-              ["/", "Insert block"],
-              ["Right-click", "Page actions"],
-              ["?", "All shortcuts"],
+              ["⌘ ⇧ F", "Focus mode"], ["⌘ ⇧ G", "Tag browser"],
+              ["⌘ ⇧ D", "Dark mode"], ["/", "Insert block"],
+              ["Right-click", "Page actions"], ["?", "All shortcuts"],
             ].map(([key, desc]) => (
-              <div key={key} className="flex items-center justify-between gap-2">
+              <div key={key} className="flex items-center justify-between gap-3 pr-4">
                 <span className="text-[12px] text-[#9B9A97] dark:text-[#6B6B6B]">{desc}</span>
-                <kbd className="text-[10px] font-mono bg-[#F0EFEC] dark:bg-[#2A2A2A] text-[#9B9A97] dark:text-[#6B6B6B] px-2 py-0.5 rounded-lg border border-[#E9E9E8] dark:border-[#3A3A3A] flex-shrink-0">
+                <kbd className="text-[10px] font-mono bg-[#F4F3F0] dark:bg-[#2A2A2A] text-[#9B9A97] dark:text-[#6B6B6B] px-1.5 py-0.5 rounded border border-[#E9E9E8] dark:border-[#3A3A3A] flex-shrink-0">
                   {key}
                 </kbd>
               </div>
@@ -263,16 +169,13 @@ function EmptyState({
           </div>
         </div>
 
-        {/* Tips */}
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9B9A97] dark:text-[#6B6B6B] px-1">Tips</p>
+        <div className="mt-4 space-y-1.5">
           {[
-            { icon: <Zap size={11} />, text: "Type / inside any page to insert headings, lists, code blocks, and more" },
-            { icon: <Tag size={11} />, text: "Add tags to pages and browse them with ⌘⇧G to find related content" },
-            { icon: <Lock size={11} />, text: "Lock a page from the header to prevent accidental edits" },
-            { icon: <LayoutGrid size={11} />, text: "Set status on pages (Todo, In Progress, Done) and track them on the Board" },
+            { icon: <Zap size={11} />, text: "Type / on any page to insert headings, lists, and code blocks" },
+            { icon: <Tag size={11} />, text: "Tag pages and use ⌘⇧G to browse related content" },
+            { icon: <Lock size={11} />, text: "Lock a page from the toolbar to prevent accidental edits" },
           ].map(({ icon, text }) => (
-            <div key={text} className="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-[#F7F6F3] dark:bg-[#252525] border border-[#E9E9E8] dark:border-[#2D2D2D]">
+            <div key={text} className="flex items-start gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-[#1F1F1F] border border-[#E9E9E8] dark:border-[#2D2D2D]">
               <span className="text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0">{icon}</span>
               <p className="text-[12px] text-[#9B9A97] dark:text-[#6B6B6B]">{text}</p>
             </div>
@@ -342,50 +245,54 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-white dark:bg-[#191919]">
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <PageHeader page={activePage} onExport={onExport} />
-        <Cover pageId={activePage.id} cover={activePage.cover} />
-        <PropertyPanel pageId={activePage.id} />
+    <div className="flex-1 flex overflow-hidden bg-[#F4F3F0] dark:bg-[#141414]">
+      {/* Scrollable document area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col px-5 py-5">
+          {/* Document island */}
+          <div className="flex-1 bg-white dark:bg-[#252525] rounded-2xl border border-[#E9E9E8] dark:border-[#2D2D2D] shadow-sm overflow-hidden flex flex-col">
+            <Cover pageId={activePage.id} cover={activePage.cover} />
+            <PropertyPanel pageId={activePage.id} />
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-16 pt-8 pb-32">
-            <div className="mb-1 mt-2 flex items-end gap-3">
-              <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
-              {activePage.locked && (
-                <span className="mb-2 flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-700/40 font-medium">
-                  <Lock size={9} /> Locked
-                </span>
-              )}
+            {/* Content */}
+            <div className="flex-1 px-14 pt-8 pb-24 max-w-3xl w-full mx-auto">
+              <div className="mb-2 flex items-end gap-3">
+                <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
+                {activePage.locked && (
+                  <span className="mb-2 flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-700/40 font-medium">
+                    <Lock size={9} /> Locked
+                  </span>
+                )}
+              </div>
+
+              <textarea
+                ref={titleRef}
+                className="w-full text-[38px] font-bold text-[#37352F] dark:text-white resize-none border-none outline-none bg-transparent
+                  placeholder-[#E4E3DF] dark:placeholder-[#3A3A3A] leading-tight mb-3 overflow-hidden tracking-tight"
+                placeholder="Untitled"
+                value={localTitle}
+                onChange={handleTitleChange}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); editor.focus(); } }}
+                rows={1}
+                readOnly={activePage.locked}
+              />
+
+              <BlockNoteView
+                editor={editor}
+                theme={dark ? "dark" : "light"}
+                onChange={handleEditorChange}
+                editable={!activePage.locked}
+              />
             </div>
 
-            <textarea
-              ref={titleRef}
-              className="w-full text-[40px] font-bold text-[#37352F] dark:text-white resize-none border-none outline-none bg-transparent
-                placeholder-[#E4E3DF] dark:placeholder-[#3A3A3A] leading-tight mb-4 overflow-hidden tracking-tight"
-              placeholder="Untitled"
-              value={localTitle}
-              onChange={handleTitleChange}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); editor.focus(); } }}
-              rows={1}
-              readOnly={activePage.locked}
-            />
-
-            <BlockNoteView
-              editor={editor}
-              theme={dark ? "dark" : "light"}
-              onChange={handleEditorChange}
-              editable={!activePage.locked}
-            />
+            {/* Footer */}
+            <div className="flex items-center justify-between px-14 py-3 border-t border-[#F4F3F0] dark:border-[#2D2D2D] max-w-3xl w-full mx-auto">
+              <WordCount editor={editor} />
+              <span className="text-[11px] text-[#C4C3BF] dark:text-[#444444]">
+                Updated {new Date(activePage.updatedAt).toLocaleDateString()}
+              </span>
+            </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-16 py-2.5 border-t border-[#E9E9E8] dark:border-[#2D2D2D]">
-          <WordCount editor={editor} />
-          <span className="text-[11px] text-[#C4C3BF] dark:text-[#444444]">
-            Updated {new Date(activePage.updatedAt).toLocaleDateString()}
-          </span>
         </div>
       </div>
 

@@ -46,13 +46,13 @@ function Pill<T extends string>({
         <ChevronDown size={9} />
       </button>
       {open && (
-        <div className="absolute top-8 left-0 z-40 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden min-w-[130px]">
+        <div className="absolute top-8 left-0 z-40 bg-white dark:bg-[#252525] border border-[#E9E9E8] dark:border-[#2D2D2D] rounded-xl shadow-lg overflow-hidden min-w-[130px]">
           {options.map((opt) => {
             const c = config[opt];
             return (
               <button
                 key={opt}
-                className={`w-full flex items-center gap-2 text-left px-3 py-2 text-[12px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${opt === value ? "font-medium" : ""}`}
+                className={`w-full flex items-center gap-2 text-left px-3 py-2 text-[12px] hover:bg-[#F4F3F0] dark:hover:bg-white/[0.05] transition-colors ${opt === value ? "font-medium" : ""}`}
                 onClick={() => { onChange(opt); setOpen(false); }}
               >
                 {hasDot && (c as { dot?: string }).dot && (
@@ -81,8 +81,8 @@ export function PropertyPanel({ pageId }: { pageId: string }) {
   };
 
   return (
-    <div className="border-b border-gray-100 dark:border-gray-800/60 px-16 py-2.5 bg-gray-50/50 dark:bg-white/[0.02]">
-      <div className="max-w-3xl mx-auto flex flex-wrap items-center gap-2">
+    <div className="border-b border-[#F4F3F0] dark:border-[#2D2D2D] px-14 py-2">
+      <div className="max-w-3xl mx-auto flex flex-wrap items-center gap-1.5">
         {/* Status */}
         <Pill
           value={page.status}

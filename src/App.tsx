@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { MantineProvider } from "@mantine/core";
-import { LayoutGrid, FileText } from "lucide-react";
+import { LayoutGrid, FileText, Star, Lock, Unlock, Download, ChevronRight } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Editor } from "./components/Editor";
 import { SearchModal } from "./components/SearchModal";
@@ -24,14 +24,24 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>("notes");
 
   const { dark, toggleDark, focusMode, toggleFocusMode } = useSettingsStore();
-  const { pages, createPage, initializeIfEmpty } = usePageStore();
+  const { pages, activePageId, createPage, initializeIfEmpty, setActive, toggleFavorite, toggleLocked } = usePageStore();
 
-  // Apply persisted dark mode class on first render
+  const activePage = activePageId ? pages[activePageId] : null;
+
+  const breadcrumbs: { id: string; title: string; icon: string }[] = [];
+  if (activePage) {
+    let cur = activePage;
+    while (cur) {
+      breadcrumbs.unshift({ id: cur.id, title: cur.title, icon: cur.icon });
+      cur = cur.parentId ? (pages[cur.parentId] ?? null!) : null!;
+      if (!cur?.id) break;
+    }
+  }
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  // Create Getting Started page if this is the first launch
   useEffect(() => {
     initializeIfEmpty();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,13 +83,14 @@ export default function App() {
     onShortcuts: () => setShortcutsOpen(true),
   };
 
-  /* Focus mode — full-screen editor only */
+  const btnCls = "w-7 h-7 flex items-center justify-center rounded-md text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors";
+
   if (focusMode) {
     return (
       <MantineProvider>
         <div className="flex flex-col h-screen w-screen overflow-hidden bg-white dark:bg-[#191919]">
           <FocusModeBar onExport={handleExport} />
-          <div className="flex-1 overflow-hidden pt-12">
+          <div className="flex-1 overflow-hidden pt-[41px]">
             <Editor {...editorProps} />
           </div>
           <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
@@ -91,7 +102,7 @@ export default function App() {
 
   return (
     <MantineProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-[#191919]">
+      <div className="flex h-screen w-screen overflow-hidden bg-[#F4F3F0] dark:bg-[#141414]">
         <Sidebar
           onSearch={() => setSearchOpen(true)}
           onExport={handleExport}
@@ -101,12 +112,15 @@ export default function App() {
 
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* View toggle bar */}
-          <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#191919]">
-            <div className="flex items-center gap-0.5 bg-[#EBEBEA] dark:bg-white/[0.05] rounded-lg p-0.5">
+
+          {/* Unified toolbar: view toggle + breadcrumb + actions */}
+          <div className="h-11 flex items-center gap-3 px-4 border-b border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#1F1F1F] flex-shrink-0">
+
+            {/* View toggle */}
+            <div className="flex items-center gap-0.5 bg-[#F4F3F0] dark:bg-white/[0.05] rounded-lg p-0.5 flex-shrink-0">
               <button
                 onClick={() => setViewMode("notes")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "notes"
                     ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
                     : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
@@ -115,7 +129,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setViewMode("board")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "board"
                     ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
                     : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
@@ -123,9 +137,58 @@ export default function App() {
                 <LayoutGrid size={12} /> Board
               </button>
             </div>
-            <span className="ml-auto text-[10px] text-[#C4C3BF] dark:text-[#444444] font-mono hidden sm:block select-none">
-              press ? for shortcuts
-            </span>
+
+            {/* Breadcrumb (notes + active page only) */}
+            {viewMode === "notes" && activePage ? (
+              <nav className="flex-1 flex items-center gap-0.5 min-w-0 overflow-hidden">
+                {breadcrumbs.map((item, i) => (
+                  <Fragment key={item.id}>
+                    {i > 0 && <ChevronRight size={11} className="flex-shrink-0 text-[#C4C3BF] dark:text-[#444444] mx-0.5" />}
+                    <button
+                      onClick={() => setActive(item.id)}
+                      className={`flex items-center gap-1 text-[12px] hover:text-[#37352F] dark:hover:text-white transition-colors truncate flex-shrink-0 max-w-[180px]
+                        ${i === breadcrumbs.length - 1 ? "text-[#37352F] dark:text-white font-medium" : "text-[#9B9A97] dark:text-[#6B6B6B]"}`}
+                    >
+                      <span className="text-[13px]">{item.icon}</span>
+                      <span className="truncate">{item.title || "Untitled"}</span>
+                    </button>
+                  </Fragment>
+                ))}
+              </nav>
+            ) : (
+              <div className="flex-1" />
+            )}
+
+            {/* Page actions (notes + active page only) */}
+            {viewMode === "notes" && activePage ? (
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <button
+                  onClick={() => toggleFavorite(activePage.id)}
+                  className={`${btnCls} ${activePage.favorited ? "text-amber-400 dark:text-amber-400" : ""}`}
+                  title={activePage.favorited ? "Remove from favorites" : "Favorite"}
+                >
+                  <Star size={13} fill={activePage.favorited ? "currentColor" : "none"} />
+                </button>
+                <button
+                  onClick={() => toggleLocked(activePage.id)}
+                  className={btnCls}
+                  title={activePage.locked ? "Unlock" : "Lock page"}
+                >
+                  {activePage.locked ? <Unlock size={13} /> : <Lock size={13} />}
+                </button>
+                <button
+                  onClick={() => handleExport(activePage.id)}
+                  className={btnCls}
+                  title="Export as Markdown"
+                >
+                  <Download size={13} />
+                </button>
+              </div>
+            ) : (
+              <span className="text-[10px] text-[#C4C3BF] dark:text-[#444444] font-mono select-none hidden sm:block">
+                press ? for shortcuts
+              </span>
+            )}
           </div>
 
           {viewMode === "notes" ? (

@@ -25,11 +25,28 @@ A Notion-clone single-page application built with React 19, TypeScript, and Bloc
 
 ```bash
 npm run dev          # Start Vite dev server at http://localhost:5173
+npm run dev          # Start Vite dev server at http://localhost:5173
 npm run build        # Type-check (tsc -b) then Vite production build
 npm run lint         # ESLint
 npx tsc --noEmit     # Type-check only, no output
 npm test             # Run Vitest test suite (once configured)
 ```
+
+---
+
+## Git Workflow
+
+**After every change, commit and push:**
+
+```bash
+git add -A
+git commit -m "short description"
+git push
+```
+
+- Run `npx tsc --noEmit` before committing to verify no TypeScript errors.
+- Always create new commits — never amend.
+- Co-author line: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
 ---
 

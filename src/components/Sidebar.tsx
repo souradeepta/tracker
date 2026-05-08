@@ -259,7 +259,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
   if (sidebarCollapsed) {
     return (
-      <aside className="w-12 flex-shrink-0 h-full bg-[#F7F6F3] dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col items-center py-3 gap-1.5">
+      <aside className="w-12 flex-shrink-0 h-full bg-white dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col items-center py-3 gap-1.5">
         <button onClick={toggleSidebarCollapsed} className={iconBtn} title="Expand sidebar"><PanelLeftOpen size={15} /></button>
         <button onClick={onSearch} className={iconBtn} title="Search"><Search size={15} /></button>
         <button onClick={() => createPage(null)} className={iconBtn} title="New page"><Plus size={15} /></button>
@@ -270,7 +270,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
   return (
     <aside
-      className="flex-shrink-0 h-full bg-[#F7F6F3] dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col relative"
+      className="flex-shrink-0 h-full bg-white dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col relative"
       style={{ width: sidebarWidth }}
     >
       {/* Workspace header */}
