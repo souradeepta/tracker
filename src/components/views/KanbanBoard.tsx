@@ -1,100 +1,99 @@
-import { Plus, MoreHorizontal } from "lucide-react";
+import { ChevronDown, Filter, MoreHorizontal, Plus, Search, SlidersHorizontal } from "lucide-react";
 import { usePageStore } from "../../store/pages";
 import { groupPagesByStatus } from "../../lib/kanban";
 import type { Page, PageStatus } from "../../types";
 
-const COLUMN_STYLES: Record<PageStatus, { header: string; dot: string; badge: string; empty: string }> = {
-  none: {
-    header: "text-gray-500 dark:text-gray-500",
-    dot: "bg-gray-300 dark:bg-gray-600",
-    badge: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500",
-    empty: "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700",
-  },
-  todo: {
-    header: "text-blue-600 dark:text-blue-400",
-    dot: "bg-blue-400",
-    badge: "bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
-    empty: "border-blue-200 dark:border-blue-900 hover:border-blue-300 dark:hover:border-blue-800",
-  },
-  "in-progress": {
-    header: "text-amber-600 dark:text-amber-400",
-    dot: "bg-amber-400",
-    badge: "bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
-    empty: "border-amber-200 dark:border-amber-900 hover:border-amber-300 dark:hover:border-amber-800",
-  },
-  done: {
-    header: "text-green-600 dark:text-green-400",
-    dot: "bg-green-400",
-    badge: "bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-400",
-    empty: "border-green-200 dark:border-green-900 hover:border-green-300 dark:hover:border-green-800",
-  },
+const STATUS_CONFIG: Record<PageStatus, { label: string; pill: string }> = {
+  none:          { label: "No status",   pill: "bg-[#F3F2EF] text-[#787774] dark:bg-white/[0.06] dark:text-[#666]" },
+  todo:          { label: "Not started", pill: "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400" },
+  "in-progress": { label: "In progress", pill: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400" },
+  done:          { label: "Complete",    pill: "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400" },
 };
 
-const PRIORITY_PILL: Record<string, string> = {
-  high:   "bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400 border-red-200 dark:border-red-700/40",
-  medium: "bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400 border-orange-200 dark:border-orange-700/40",
-  low:    "bg-sky-50 text-sky-500 dark:bg-sky-500/10 dark:text-sky-400 border-sky-200 dark:border-sky-700/40",
+const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
+  high:   { label: "High 🔥", className: "bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-700/30" },
+  medium: { label: "Medium",  className: "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-700/30" },
+  low:    { label: "Low",     className: "bg-sky-50 text-sky-600 border-sky-100 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-700/30" },
 };
 
 function KanbanCard({ page }: { page: Page }) {
-  const { setActive, setStatus } = usePageStore();
+  const { setActive } = usePageStore();
 
   return (
     <div
-      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/60 rounded-xl p-3.5 shadow-sm hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700/40 cursor-pointer transition-all group"
+      className="bg-white dark:bg-[#1E1E1E] border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] cursor-pointer transition-all group"
       onClick={() => setActive(page.id)}
     >
-      {/* Title row */}
-      <div className="flex items-start gap-2.5 mb-2.5">
-        <span className="text-[18px] flex-shrink-0 leading-tight mt-0.5">{page.icon}</span>
-        <p className="flex-1 text-[13px] font-medium text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">
-          {page.title || <span className="text-gray-400 dark:text-gray-600 italic font-normal">Untitled</span>}
+      <div className="flex items-start gap-2.5 mb-3">
+        <span className="text-[18px] leading-tight flex-shrink-0 mt-0.5">{page.icon}</span>
+        <p className="flex-1 text-[14px] font-semibold text-[#1A1A1A] dark:text-white leading-snug line-clamp-2 min-h-[1.4em]">
+          {page.title || <span className="text-[#9B9A97] italic font-normal">Untitled</span>}
         </p>
         <button
           onClick={(e) => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex-shrink-0"
+          className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.06] transition-all flex-shrink-0"
         >
           <MoreHorizontal size={13} />
         </button>
       </div>
 
-      {/* Tags */}
-      {page.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {page.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700/30 px-1.5 py-0.5 rounded-full font-medium"
-            >
-              {tag}
-            </span>
-          ))}
-          {page.tags.length > 3 && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-600">+{page.tags.length - 3}</span>
-          )}
-        </div>
-      )}
-
-      {/* Footer */}
-      {page.priority !== "none" && (
-        <div className="flex items-center justify-between">
-          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${PRIORITY_PILL[page.priority]}`}>
-            {page.priority}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {page.priority !== "none" && (
+          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${PRIORITY_CONFIG[page.priority].className}`}>
+            {PRIORITY_CONFIG[page.priority].label}
           </span>
-        </div>
-      )}
-
-      {/* Quick status change */}
-      <div className="mt-2 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {(["todo", "in-progress", "done", "none"] as PageStatus[]).filter((s) => s !== page.status).map((s) => (
-          <button
-            key={s}
-            onClick={(e) => { e.stopPropagation(); setStatus(page.id, s); }}
-            className="text-[10px] text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+        )}
+        {page.tags.slice(0, 2).map((tag) => (
+          <span
+            key={tag}
+            className="text-[11px] bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700/30 px-1.5 py-0.5 rounded-full font-medium"
           >
-            → {s === "none" ? "clear" : s}
-          </button>
+            {tag}
+          </span>
         ))}
+        {page.tags.length > 2 && (
+          <span className="text-[11px] text-[#9B9A97] dark:text-[#555]">+{page.tags.length - 2}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Column({ status, pages, onAdd }: { status: PageStatus; pages: Page[]; onAdd: () => void }) {
+  const cfg = STATUS_CONFIG[status];
+  return (
+    <div className="flex flex-col w-[272px] flex-shrink-0 h-full">
+      <div className="flex items-center justify-between mb-3 px-0.5">
+        <div className="flex items-center gap-2">
+          <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full ${cfg.pill}`}>
+            {cfg.label}
+          </span>
+          <span className="text-[13px] text-[#9B9A97] dark:text-[#555] font-medium">{pages.length}</span>
+        </div>
+        <div className="flex items-center gap-0.5">
+          <button className="w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#EDECE9] dark:hover:bg-white/[0.05] transition-colors">
+            <MoreHorizontal size={13} />
+          </button>
+          <button
+            onClick={onAdd}
+            className="w-6 h-6 flex items-center justify-center rounded-md text-[#9B9A97] hover:bg-[#EDECE9] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors"
+          >
+            <Plus size={13} />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 overflow-y-auto flex-1 pb-2">
+        {pages
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+          .map((page) => <KanbanCard key={page.id} page={page} />)}
+
+        <button
+          onClick={onAdd}
+          className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-[#9B9A97] dark:text-[#555] hover:text-[#1A1A1A] dark:hover:text-white hover:bg-[#EDECE9] dark:hover:bg-white/[0.04] transition-colors mt-1"
+        >
+          <Plus size={14} /> New
+        </button>
       </div>
     </div>
   );
@@ -105,64 +104,67 @@ export function KanbanBoard() {
   const livePages = Object.values(pages).filter((p) => !p.deleted);
   const columns = groupPagesByStatus(livePages);
 
-  const handleAddCard = (status: PageStatus) => {
+  const handleAdd = (status: PageStatus) => {
     const id = createPage(null);
     setStatus(id, status);
   };
 
   return (
-    <div className="flex-1 overflow-x-auto overflow-y-hidden bg-gray-50 dark:bg-[#0A0A0A]">
-      <div className="flex gap-4 p-6 h-full min-w-max items-start">
-        {columns.map((col) => {
-          const s = COLUMN_STYLES[col.status];
-          return (
-            <div key={col.status} className="flex flex-col w-[280px] flex-shrink-0 max-h-full">
-              {/* Column header */}
-              <div className="flex items-center justify-between mb-3 px-1">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${s.dot}`} />
-                  <span className={`text-[12px] font-semibold ${s.header}`}>{col.label}</span>
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${s.badge}`}>
-                    {col.pages.length}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleAddCard(col.status)}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                  title={`Add to ${col.label}`}
-                >
-                  <Plus size={13} />
-                </button>
-              </div>
+    <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-[#191919]">
+      {/* Toolbar */}
+      <div className="h-11 flex items-center gap-1 px-6 border-b border-black/[0.06] dark:border-white/[0.06] flex-shrink-0">
+        <button className="flex items-center gap-1.5 text-[13px] font-medium text-[#1A1A1A] dark:text-white px-2.5 py-1.5 rounded-lg hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] transition-colors">
+          <SlidersHorizontal size={13} className="text-[#9B9A97]" />
+          By Status
+          <ChevronDown size={11} className="text-[#9B9A97]" />
+        </button>
 
-              {/* Cards */}
-              <div className="flex flex-col gap-2 overflow-y-auto flex-1 pb-2">
-                {col.pages
-                  .sort((a, b) => b.updatedAt - a.updatedAt)
-                  .map((page) => <KanbanCard key={page.id} page={page} />)}
+        <div className="w-px h-4 bg-black/[0.08] dark:bg-white/[0.08] mx-1" />
 
-                {col.pages.length === 0 && (
-                  <button
-                    className={`border-2 border-dashed ${s.empty} rounded-xl p-5 text-center transition-colors`}
-                    onClick={() => handleAddCard(col.status)}
-                  >
-                    <p className="text-[12px] text-gray-400 dark:text-gray-600">No pages</p>
-                    <p className="text-[11px] text-gray-300 dark:text-gray-700 mt-0.5">Click to add one</p>
-                  </button>
-                )}
+        {(["Properties", "Group by Status", "Filter", "Sort"] as const).map((label) => (
+          <button
+            key={label}
+            className="flex items-center gap-1.5 text-[13px] text-[#9B9A97] dark:text-[#555] hover:text-[#1A1A1A] dark:hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] transition-colors"
+          >
+            {label === "Filter" && <Filter size={11} />}
+            {label}
+          </button>
+        ))}
 
-                {col.pages.length > 0 && (
-                  <button
-                    onClick={() => handleAddCard(col.status)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 border border-dashed border-gray-200 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-800 transition-all"
-                  >
-                    <Plus size={12} /> Add page
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        <div className="flex-1" />
+
+        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors">
+          <Search size={13} />
+        </button>
+        <button className="w-7 h-7 flex items-center justify-center rounded-lg text-[#9B9A97] hover:bg-[#F3F2EF] dark:hover:bg-white/[0.05] hover:text-[#1A1A1A] dark:hover:text-white transition-colors">
+          <MoreHorizontal size={13} />
+        </button>
+
+        <div className="flex items-center ml-1">
+          <button
+            onClick={() => createPage(null)}
+            className="flex items-center gap-1.5 bg-[#2383E2] hover:bg-[#1a73d6] text-white text-[13px] font-medium px-3 py-1.5 rounded-l-lg transition-colors"
+          >
+            New
+          </button>
+          <button className="bg-[#2383E2] hover:bg-[#1a73d6] text-white px-1.5 py-1.5 rounded-r-lg border-l border-white/20 transition-colors">
+            <ChevronDown size={12} />
+          </button>
+        </div>
+      </div>
+
+      {/* Columns */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden bg-[#F9F9F7] dark:bg-[#111111]">
+        <div className="flex gap-5 p-6 h-full min-w-max items-start">
+          {columns.map((col) => (
+            <Column
+              key={col.status}
+              status={col.status}
+              pages={col.pages}
+              onAdd={() => handleAdd(col.status)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

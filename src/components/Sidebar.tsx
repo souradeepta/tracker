@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   ChevronRight, ChevronDown, Plus, Trash2, Search,
   RotateCcw, X, Moon, Sun, Download, Layout,
-  PanelLeftClose, PanelLeftOpen, Lock, Keyboard, Zap,
+  PanelLeftClose, PanelLeftOpen, Lock, Keyboard, Zap, Home,
 } from "lucide-react";
 import { usePageStore } from "../store/pages";
 import { useSettingsStore } from "../store/settings";
@@ -184,7 +184,7 @@ interface Props {
 }
 
 export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props) {
-  const { pages, createPage } = usePageStore();
+  const { pages, activePageId, createPage, setActive } = usePageStore();
   const { dark, toggleDark, sidebarWidth, setSidebarWidth, sidebarCollapsed, toggleSidebarCollapsed } = useSettingsStore();
 
   const favorites = Object.values(pages).filter((p) => p.favorited && !p.deleted);
@@ -249,6 +249,17 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
       {/* Nav */}
       <div className="px-2 py-2 space-y-0.5 border-b border-black/[0.04] dark:border-white/[0.04]">
+        <button
+          onClick={() => setActive(null)}
+          className={`w-full flex items-center gap-2.5 px-2.5 h-8 rounded-lg text-[13px] transition-colors ${
+            activePageId === null
+              ? "bg-[#F0EFEC] dark:bg-white/[0.07] text-[#1A1A1A] dark:text-white font-medium"
+              : "text-[#5E5C58] dark:text-white/50 hover:bg-[#F0EFEC] dark:hover:bg-white/[0.04] hover:text-[#1A1A1A] dark:hover:text-white"
+          }`}
+        >
+          <Home size={13} className={activePageId === null ? "text-[#5E5C58] dark:text-white" : "text-[#C4C3BF] dark:text-[#444]"} />
+          Home
+        </button>
         <button
           onClick={onSearch}
           className="w-full flex items-center gap-2.5 px-2.5 h-8 rounded-lg bg-[#F5F4F1] dark:bg-white/[0.04] text-[13px] text-[#9B9A97] dark:text-[#555] hover:bg-[#EDECE9] dark:hover:bg-white/[0.06] transition-colors"

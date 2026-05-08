@@ -14,6 +14,7 @@ export interface Page {
   deleted: boolean;
   deletedAt: number | null;
   locked: boolean;
+  description?: string;
   tags: string[];
   status: PageStatus;
   priority: PagePriority;

@@ -102,7 +102,7 @@ export default function App() {
 
   return (
     <MantineProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-[#F5F4F1] dark:bg-[#111111]">
+      <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-[#191919]">
         <Sidebar
           onSearch={() => setSearchOpen(true)}
           onExport={handleExport}

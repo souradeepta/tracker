@@ -25,6 +25,7 @@ interface PageStore {
 
   // Updates
   updateTitle: (id: string, title: string) => void;
+  updateDescription: (id: string, description: string) => void;
   updateIcon: (id: string, icon: string) => void;
   updateCover: (id: string, cover: string | null) => void;
   updateContent: (id: string, content: PartialBlock[]) => void;
@@ -63,6 +64,7 @@ function newPage(overrides?: Partial<Page>): Page {
     deleted: false,
     deletedAt: null,
     locked: false,
+    description: "",
     tags: [],
     status: "none",
     priority: "none",
@@ -180,6 +182,11 @@ export const usePageStore = create<PageStore>()(
       updateTitle: (id, title) =>
         set((state) => ({
           pages: { ...state.pages, [id]: { ...state.pages[id], title, updatedAt: Date.now() } },
+        })),
+
+      updateDescription: (id, description) =>
+        set((state) => ({
+          pages: { ...state.pages, [id]: { ...state.pages[id], description, updatedAt: Date.now() } },
         })),
 
       updateIcon: (id, icon) =>
