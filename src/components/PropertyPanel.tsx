@@ -73,8 +73,7 @@ export function PropertyPanel({ pageId }: { pageId: string }) {
   };
 
   return (
-    <div className="border-b border-black/[0.04] dark:border-white/[0.04] px-[120px] py-4">
-      <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
         <Pill
           value={page.status}
           options={["none", "todo", "in-progress", "done"] as PageStatus[]}
@@ -121,7 +120,6 @@ export function PropertyPanel({ pageId }: { pageId: string }) {
             className="text-[11px] outline-none bg-transparent text-[#9B9A97] placeholder-black/20 dark:placeholder-white/20 w-12"
           />
         </div>
-      </div>
     </div>
   );
 }

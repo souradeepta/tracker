@@ -3,6 +3,19 @@
 /* Tailwind v4: class-based dark mode (matches .dark ancestor) */
 @variant dark (&:where(.dark, .dark *));
 
+:root {
+  --canvas-bg: #D8D3CD;
+  --sidebar-bg: #ffffff;
+  --content-bg: #ffffff;
+  --content-pad-x: 96px;
+}
+
+.dark {
+  --canvas-bg: #111111;
+  --sidebar-bg: #1E1E1E;
+  --content-bg: #1E1E1E;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -22,4 +35,17 @@ body {
   height: 100vh;
   display: flex;
   overflow: hidden;
+}
+
+/* ── Content column centering ─────────────────────────────────────────────── */
+.content-col {
+  width: 100%;
+  max-width: 740px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content-body {
+  padding-left: var(--content-pad-x);
+  padding-right: var(--content-pad-x);
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import type { PartialBlock } from "@blocknote/core";
-import { Lock, Clock, FileText, Search, Layers } from "lucide-react";
+import { Clock, FileText, Lock, Layers, Search } from "lucide-react";
 import { usePageStore } from "../store/pages";
 import { useSettingsStore } from "../store/settings";
 import { estimateReadingTime } from "../lib/readingTime";
@@ -36,7 +36,6 @@ function IconPicker({ icon, pageId, locked }: { icon: string; pageId: string; lo
       <button
         className="text-5xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] rounded-xl p-2 -ml-2 transition-colors disabled:cursor-default"
         onClick={() => !locked && setOpen((v) => !v)}
-        title={locked ? "Page is locked" : "Change icon"}
         disabled={locked}
       >
         {icon}
@@ -63,7 +62,9 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   useEffect(() => {
     const calc = () => {
       const text = editor.document
-        .map((b: { content?: unknown }) => Array.isArray(b.content) ? (b.content as { text: string }[]).map((c) => c.text).join(" ") : "")
+        .map((b: { content?: unknown }) =>
+          Array.isArray(b.content) ? (b.content as { text: string }[]).map((c) => c.text).join(" ") : ""
+        )
         .join(" ");
       setCount(text.trim() ? text.trim().split(/\s+/).length : 0);
     };
@@ -72,9 +73,11 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   }, [editor]);
   const readingMins = estimateReadingTime(count);
   return (
-    <div className="flex items-center gap-3 text-[12px] text-[#9B9A97] dark:text-[#666666]">
+    <div className="flex items-center gap-4 text-[12px] text-[#9B9A97] dark:text-[#555]">
       <span>{count} {count === 1 ? "word" : "words"}</span>
-      <span className="flex items-center gap-1.5"><Clock size={11} /> {readingMins} min read</span>
+      <span className="flex items-center gap-1.5">
+        <Clock size={11} /> {readingMins} min read
+      </span>
     </div>
   );
 }
@@ -109,43 +112,47 @@ function HomeDashboard({ pages, recentPageIds, onNew, onSearch, onTemplates }: {
 
   return (
     <div className="flex-1 overflow-y-auto bg-white dark:bg-[#191919]">
-      <div className="max-w-[860px] mx-auto px-[120px] pt-24 pb-24">
-        <h1 className="text-[32px] font-bold text-[#1A1A1A] dark:text-white tracking-[-0.5px] mb-10">
+      {/* Centered column — same width as page content */}
+      <div className="content-col px-12 pt-24 pb-24">
+        <h1 className="text-4xl font-bold text-[#1A1A1A] dark:text-white tracking-tight mb-12">
           {greeting}
         </h1>
 
         {recent.length > 0 && (
-          <section className="mb-10">
-            <p className="text-[11px] font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-[0.08em] mb-3 flex items-center gap-1.5">
+          <section className="mb-12">
+            <p className="text-xs font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-widest mb-4 flex items-center gap-2">
               <Clock size={11} /> Recently visited
             </p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {recent.map((page) => {
                 const coverGrad = page.cover ? COVERS[page.cover] : null;
                 return (
                   <button
                     key={page.id}
                     onClick={() => setActive(page.id)}
-                    className="text-left border border-black/[0.07] dark:border-white/[0.07] rounded-xl overflow-hidden hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all bg-white dark:bg-[#1E1E1E]"
+                    className="text-left border border-black/[0.07] dark:border-white/[0.07] rounded-2xl overflow-hidden hover:shadow-lg transition-all bg-white dark:bg-[#1E1E1E] hover:border-black/[0.14] dark:hover:border-white/[0.14]"
                   >
                     <div
-                      className="h-[72px]"
-                      style={coverGrad ? { background: coverGrad } : { background: "#F5F4F1" }}
+                      className="h-20"
+                      style={coverGrad
+                        ? { background: coverGrad }
+                        : { background: "linear-gradient(135deg, #f0ede8 0%, #e8e4de 100%)" }
+                      }
                     >
                       {!coverGrad && (
-                        <div className="h-full flex items-center justify-center text-3xl opacity-30 dark:opacity-20">
+                        <div className="h-full flex items-center justify-center text-4xl opacity-25">
                           {page.icon}
                         </div>
                       )}
                     </div>
-                    <div className="px-3.5 py-3">
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[13px] leading-none">{page.icon}</span>
-                        <p className="text-[13px] font-semibold text-[#1A1A1A] dark:text-white truncate">
+                    <div className="px-4 py-3.5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-base leading-none">{page.icon}</span>
+                        <p className="text-sm font-semibold text-[#1A1A1A] dark:text-white truncate">
                           {page.title || "Untitled"}
                         </p>
                       </div>
-                      <p className="text-[11px] text-[#9B9A97] dark:text-[#555]">{timeAgo(page.updatedAt)}</p>
+                      <p className="text-xs text-[#9B9A97] dark:text-[#555]">{timeAgo(page.updatedAt)}</p>
                     </div>
                   </button>
                 );
@@ -155,26 +162,26 @@ function HomeDashboard({ pages, recentPageIds, onNew, onSearch, onTemplates }: {
         )}
 
         <section>
-          <p className="text-[11px] font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-[0.08em] mb-3">
+          <p className="text-xs font-semibold text-[#9B9A97] dark:text-[#555] uppercase tracking-widest mb-4">
             Quick actions
           </p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4">
             {[
-              { icon: <FileText size={15} />, title: "New page", desc: "Start writing instantly", action: onNew },
-              { icon: <Search size={15} />, title: "Search", desc: "Find anything fast", action: onSearch },
-              { icon: <Layers size={15} />, title: "Templates", desc: "Start from a layout", action: onTemplates },
+              { icon: <FileText size={16} />, title: "New page", desc: "Start writing instantly", action: onNew },
+              { icon: <Search size={16} />, title: "Search", desc: "Find anything fast", action: onSearch },
+              { icon: <Layers size={16} />, title: "Templates", desc: "Start from a layout", action: onTemplates },
             ].map(({ icon, title, desc, action }) => (
               <button
                 key={title}
                 onClick={action}
-                className="flex items-center gap-3 p-4 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-white dark:bg-[#1E1E1E] hover:border-indigo-200 dark:hover:border-indigo-700/60 hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all text-left group"
+                className="flex items-center gap-4 p-5 rounded-2xl border border-black/[0.07] dark:border-white/[0.07] bg-white dark:bg-[#1E1E1E] hover:border-indigo-200 dark:hover:border-indigo-700/60 hover:shadow-md transition-all text-left group"
               >
-                <div className="w-8 h-8 rounded-lg bg-[#F5F4F1] dark:bg-white/[0.05] flex items-center justify-center text-[#5E5C58] dark:text-white/60 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] flex items-center justify-center text-[#5E5C58] dark:text-white/60 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 transition-colors flex-shrink-0">
                   {icon}
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-[#1A1A1A] dark:text-white">{title}</p>
-                  <p className="text-[11px] text-[#9B9A97] dark:text-[#555] leading-relaxed">{desc}</p>
+                  <p className="text-sm font-semibold text-[#1A1A1A] dark:text-white">{title}</p>
+                  <p className="text-xs text-[#9B9A97] dark:text-[#555] mt-0.5">{desc}</p>
                 </div>
               </button>
             ))}
@@ -265,18 +272,25 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
 
   return (
     <div className="flex-1 flex overflow-hidden bg-white dark:bg-[#191919]">
+      {/* ── Scrollable column ─────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
-        {/* Cover — full viewport width */}
+        {/* Cover — full width */}
         <Cover pageId={activePage.id} cover={activePage.cover} />
 
-        {/* Centered content column */}
-        <div className="max-w-[900px] mx-auto w-full">
-          {/* Property panel */}
-          <PropertyPanel pageId={activePage.id} />
+        {/* ── Centered content column (max-w forces breathing room) ───────── */}
+        <div className="content-col">
+
+          {/* Properties bar */}
+          <div className="border-b border-black/[0.06] dark:border-white/[0.06]">
+            <div className="content-body py-4">
+              <PropertyPanel pageId={activePage.id} />
+            </div>
+          </div>
 
           {/* Page body */}
-          <div className="px-[120px] pt-14 pb-40">
-            <div className="mb-4 flex items-end gap-3">
+          <div className="content-body pt-14 pb-40">
+            {/* Icon row */}
+            <div className="mb-5 flex items-end gap-3">
               <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
               {activePage.locked && (
                 <span className="mb-2 flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full border border-amber-200/60 dark:border-amber-700/40 font-medium">
@@ -285,9 +299,11 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
               )}
             </div>
 
+            {/* Title */}
             <textarea
               ref={titleRef}
-              className="w-full text-[40px] font-bold text-[#1A1A1A] dark:text-white resize-none border-none outline-none bg-transparent placeholder-black/10 dark:placeholder-white/10 leading-[1.15] mb-2 overflow-hidden tracking-[-0.5px]"
+              className="w-full text-[42px] font-bold text-[#1A1A1A] dark:text-white resize-none border-none outline-none bg-transparent leading-tight mb-3 overflow-hidden tracking-tight"
+              style={{ letterSpacing: "-0.02em" }}
               placeholder="Untitled"
               value={localTitle}
               onChange={handleTitleChange}
@@ -299,9 +315,10 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
               readOnly={activePage.locked}
             />
 
+            {/* Description */}
             <textarea
               ref={descRef}
-              className="w-full text-[16px] text-[#9B9A97] dark:text-[#666] resize-none border-none outline-none bg-transparent placeholder-black/[0.12] dark:placeholder-white/[0.12] leading-relaxed mb-8 overflow-hidden"
+              className="w-full text-[17px] text-[#9B9A97] dark:text-[#666] resize-none border-none outline-none bg-transparent leading-relaxed mb-10 overflow-hidden"
               placeholder="Add a description..."
               value={localDescription}
               onChange={handleDescriptionChange}
@@ -323,9 +340,9 @@ export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: Ed
 
           {/* Footer */}
           <div className="border-t border-black/[0.05] dark:border-white/[0.05]">
-            <div className="flex items-center justify-between px-[120px] py-5">
+            <div className="content-body py-5 flex items-center justify-between">
               <WordCount editor={editor} />
-              <span className="text-[12px] text-[#C4C3BF] dark:text-[#444444]">
+              <span className="text-[12px] text-[#C4C3BF] dark:text-[#444]">
                 Updated {new Date(activePage.updatedAt).toLocaleDateString()}
               </span>
             </div>
