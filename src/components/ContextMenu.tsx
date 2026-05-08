@@ -37,10 +37,10 @@ export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
     onClick: () => void;
   }) => (
     <button
-      className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-left text-sm rounded
+      className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-left text-[13px] rounded-md
         ${danger
           ? "text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-          : "text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800"
+          : "text-[#37352F]/80 dark:text-white/70 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.05]"
         }`}
       onClick={() => { onClick(); onClose(); }}
     >
@@ -59,7 +59,7 @@ export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
     <div
       ref={ref}
       style={menuStyle}
-      className="z-50 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-xl py-1 w-48"
+      className="z-50 bg-white dark:bg-[#252525] border border-[#E9E9E8] dark:border-[#2D2D2D] rounded-xl shadow-xl py-1 w-48"
     >
       <Item icon={<ExternalLink size={13} />} label="Open" onClick={() => setActive(pageId)} />
       <Item icon={<Copy size={13} />} label="Duplicate" onClick={() => duplicatePage(pageId)} />
@@ -74,7 +74,7 @@ export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
         onClick={() => toggleLocked(pageId)}
       />
       <Item icon={<Download size={13} />} label="Export as Markdown" onClick={() => onExport(pageId)} />
-      <div className="border-t border-gray-100 dark:border-neutral-800 my-1" />
+      <div className="border-t border-[#F0EFEC] dark:border-[#2D2D2D] my-1" />
       <Item icon={<Trash2 size={13} />} label="Move to trash" danger onClick={() => trashPage(pageId)} />
     </div>
   );

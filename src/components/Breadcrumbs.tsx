@@ -15,7 +15,7 @@ export function Breadcrumbs({ pageId }: { pageId: string }) {
   if (chain.length <= 1) return null;
 
   return (
-    <nav className="flex items-center gap-1 text-xs text-gray-400 dark:text-neutral-500 mb-1 flex-wrap">
+    <nav className="flex items-center gap-1 text-xs text-[#9B9A97] dark:text-[#6B6B6B] mb-1 flex-wrap">
       {chain.map((item, i) => (
         <React.Fragment key={item.id}>
           {i > 0 && <ChevronRight size={11} className="flex-shrink-0" />}

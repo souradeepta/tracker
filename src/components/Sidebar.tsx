@@ -44,10 +44,10 @@ function PageItem({
   return (
     <div>
       <div
-        className={`group flex items-center rounded-lg cursor-pointer select-none transition-all duration-100
+        className={`group flex items-center rounded-md cursor-pointer select-none transition-colors duration-100
           ${isActive
-            ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
-            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] hover:text-gray-900 dark:hover:text-gray-100"
+            ? "bg-[#37352F]/[0.08] dark:bg-white/[0.07] text-[#37352F] dark:text-white"
+            : "text-[#37352F]/75 dark:text-white/55 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white"
           }`}
         style={{ paddingLeft: `${8 + depth * 14}px`, paddingRight: "4px", paddingTop: "3px", paddingBottom: "3px" }}
         onClick={() => setActive(page.id)}
@@ -56,8 +56,8 @@ function PageItem({
         onMouseLeave={() => setHovered(false)}
       >
         <button
-          className={`w-5 h-5 flex items-center justify-center rounded-md flex-shrink-0 transition-colors
-            ${isActive ? "text-indigo-400" : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`}
+          className={`w-5 h-5 flex items-center justify-center rounded flex-shrink-0 transition-colors
+            ${isActive ? "text-[#37352F]/40 dark:text-white/30" : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
           onClick={(e) => { e.stopPropagation(); if (children.length > 0) toggleExpand(page.id); }}
         >
           {children.length > 0
@@ -67,25 +67,25 @@ function PageItem({
 
         <span className="text-[14px] leading-none flex-shrink-0 mr-1.5">{page.icon}</span>
 
-        <span className={`flex-1 text-[13px] font-medium truncate ${isActive ? "" : "font-normal"}`}>
-          {page.title || <span className="opacity-40 font-normal italic">Untitled</span>}
+        <span className={`flex-1 text-[13px] truncate ${isActive ? "font-medium" : "font-normal"}`}>
+          {page.title || <span className="opacity-40 italic">Untitled</span>}
         </span>
 
-        {page.locked && (
-          <Lock size={9} className={`flex-shrink-0 mr-1 ${isActive ? "text-indigo-400" : "text-gray-300 dark:text-gray-600"}`} />
+        {page.locked && !hovered && (
+          <Lock size={9} className={`flex-shrink-0 mr-1 ${isActive ? "text-[#37352F]/40 dark:text-white/30" : "text-[#C4C3BF] dark:text-[#444444]"}`} />
         )}
 
         {hovered && !isActive && (
           <div className="flex items-center flex-shrink-0 gap-0.5">
             <button
-              className="w-5 h-5 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+              className="w-5 h-5 flex items-center justify-center rounded text-[#9B9A97] hover:text-[#37352F] dark:hover:text-white hover:bg-[#37352F]/[0.08] dark:hover:bg-white/[0.08] transition-colors"
               onClick={(e) => { e.stopPropagation(); onExport(page.id); }}
               title="Export"
             >
               <Download size={10} />
             </button>
             <button
-              className="w-5 h-5 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+              className="w-5 h-5 flex items-center justify-center rounded text-[#9B9A97] hover:text-[#37352F] dark:hover:text-white hover:bg-[#37352F]/[0.08] dark:hover:bg-white/[0.08] transition-colors"
               onClick={(e) => { e.stopPropagation(); createPage(page.id); }}
               title="Add sub-page"
             >
@@ -128,28 +128,28 @@ function TrashSection() {
   return (
     <div className="mt-2">
       <button
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-white/[0.05] hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white transition-colors"
         onClick={() => setOpen((v) => !v)}
       >
         {open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         <Trash2 size={12} />
         <span>Trash</span>
-        <span className="ml-auto text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-full font-medium">
+        <span className="ml-auto text-[10px] bg-[#37352F]/[0.08] dark:bg-white/[0.06] text-[#9B9A97] dark:text-[#6B6B6B] px-1.5 py-0.5 rounded-full font-medium">
           {trashed.length}
         </span>
       </button>
       {open && (
         <div className="mt-1 ml-4 space-y-0.5">
           {trashed.map((page) => (
-            <div key={page.id} className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-white/[0.03] group">
+            <div key={page.id} className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-[#37352F]/[0.04] dark:hover:bg-white/[0.03] group">
               <span className="text-sm">{page.icon}</span>
-              <span className="flex-1 text-[12px] text-gray-400 dark:text-gray-500 truncate">
+              <span className="flex-1 text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] truncate">
                 {page.title || "Untitled"}
               </span>
-              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-all" onClick={() => restorePage(page.id)} title="Restore">
+              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-[#9B9A97] hover:text-green-600 dark:hover:text-green-400 transition-all" onClick={() => restorePage(page.id)} title="Restore">
                 <RotateCcw size={10} />
               </button>
-              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-gray-400 hover:text-red-500 transition-all" onClick={() => permanentDelete(page.id)} title="Delete">
+              <button className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-[#9B9A97] hover:text-red-500 transition-all" onClick={() => permanentDelete(page.id)} title="Delete">
                 <X size={10} />
               </button>
             </div>
@@ -173,7 +173,7 @@ function RecentSection() {
   return (
     <div className="mb-1">
       <button
-        className="w-full flex items-center gap-2 px-2 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors mb-0.5"
+        className="w-full flex items-center gap-2 px-2 py-1 rounded-md text-[11px] font-semibold uppercase tracking-widest text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white transition-colors mb-0.5"
         onClick={() => setOpen((v) => !v)}
       >
         {open ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
@@ -185,7 +185,7 @@ function RecentSection() {
           {recents.map((page) => (
             <button
               key={page.id}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[12px] text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-[12px] text-[#37352F]/65 dark:text-white/50 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white transition-colors"
               onClick={() => setActive(page.id)}
             >
               <span className="text-[13px] flex-shrink-0">{page.icon}</span>
@@ -202,13 +202,13 @@ function RecentSection() {
 function SectionHeader({ label, onAdd }: { label: string; onAdd?: () => void }) {
   return (
     <div className="flex items-center justify-between px-2 pt-4 pb-1">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-600">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-[#9B9A97] dark:text-[#6B6B6B]">
         {label}
       </span>
       {onAdd && (
         <button
           onClick={onAdd}
-          className="w-4 h-4 flex items-center justify-center rounded text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
+          className="w-4 h-4 flex items-center justify-center rounded text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] transition-colors"
           title="New page"
         >
           <Plus size={12} />
@@ -255,11 +255,11 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
     window.addEventListener("mouseup", onUp);
   }, [sidebarWidth, setSidebarWidth]);
 
-  const iconBtn = "w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-white/[0.05] hover:text-gray-700 dark:hover:text-gray-200 transition-colors";
+  const iconBtn = "w-8 h-8 flex items-center justify-center rounded-lg text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors";
 
   if (sidebarCollapsed) {
     return (
-      <aside className="w-12 flex-shrink-0 h-full bg-gray-50 dark:bg-[#111111] border-r border-gray-200 dark:border-[#1F1F1F] flex flex-col items-center py-3 gap-1.5">
+      <aside className="w-12 flex-shrink-0 h-full bg-[#F7F6F3] dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col items-center py-3 gap-1.5">
         <button onClick={toggleSidebarCollapsed} className={iconBtn} title="Expand sidebar"><PanelLeftOpen size={15} /></button>
         <button onClick={onSearch} className={iconBtn} title="Search"><Search size={15} /></button>
         <button onClick={() => createPage(null)} className={iconBtn} title="New page"><Plus size={15} /></button>
@@ -270,7 +270,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
 
   return (
     <aside
-      className="flex-shrink-0 h-full bg-gray-50 dark:bg-[#111111] border-r border-gray-200 dark:border-[#1F1F1F] flex flex-col relative"
+      className="flex-shrink-0 h-full bg-[#F7F6F3] dark:bg-[#1F1F1F] border-r border-[#E9E9E8] dark:border-[#2D2D2D] flex flex-col relative"
       style={{ width: sidebarWidth }}
     >
       {/* Workspace header */}
@@ -278,7 +278,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-sm flex-shrink-0">
           <span className="text-white text-[11px] font-bold tracking-tight">T</span>
         </div>
-        <span className="flex-1 text-[13px] font-semibold text-gray-900 dark:text-gray-50 truncate">Tracker</span>
+        <span className="flex-1 text-[13px] font-semibold text-[#37352F] dark:text-white truncate">Tracker</span>
         <button onClick={toggleDark} className={iconBtn} title="Toggle dark mode">
           {dark ? <Sun size={14} /> : <Moon size={14} />}
         </button>
@@ -291,11 +291,11 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
       <div className="px-2 pb-1 space-y-0.5">
         <button
           onClick={onSearch}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] text-[13px] text-gray-400 dark:text-gray-500 hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:text-gray-600 dark:hover:text-gray-300 transition-all shadow-sm"
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#EBEBEA] dark:bg-white/[0.05] text-[13px] text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#E4E3DF] dark:hover:bg-white/[0.07] hover:text-[#37352F] dark:hover:text-white transition-colors"
         >
           <Search size={13} />
           <span className="flex-1 text-left">Search…</span>
-          <kbd className="text-[10px] font-mono bg-gray-100 dark:bg-white/[0.06] text-gray-400 dark:text-gray-600 px-1.5 py-0.5 rounded-md border border-gray-200 dark:border-white/[0.06]">⌘K</kbd>
+          <kbd className="text-[10px] font-mono text-[#C4C3BF] dark:text-[#444444]">⌘K</kbd>
         </button>
       </div>
 
@@ -308,11 +308,11 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
           <button
             key={label}
             onClick={action}
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] text-[#37352F]/65 dark:text-white/50 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white transition-colors"
           >
-            <span className="text-gray-400 dark:text-gray-500">{icon}</span>
+            <span className="text-[#9B9A97] dark:text-[#6B6B6B]">{icon}</span>
             <span className="flex-1 text-left">{label}</span>
-            {shortcut && <kbd className="text-[10px] font-mono text-gray-300 dark:text-gray-700">{shortcut}</kbd>}
+            {shortcut && <kbd className="text-[10px] font-mono text-[#C4C3BF] dark:text-[#444444]">{shortcut}</kbd>}
           </button>
         ))}
       </div>
@@ -335,7 +335,7 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
           {rootPages.length === 0 ? (
             <button
               onClick={() => createPage(null)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-gray-400 dark:text-gray-600 border border-dashed border-gray-200 dark:border-gray-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/5 transition-all mt-1"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] border border-dashed border-[#37352F]/[0.12] dark:border-white/[0.08] hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white transition-colors mt-1"
             >
               <Plus size={12} /> Create your first page
             </button>
@@ -347,20 +347,20 @@ export function Sidebar({ onSearch, onExport, onTemplates, onShortcuts }: Props)
         <TrashSection />
       </div>
 
-      {/* New page footer button */}
-      <div className="px-3 pb-3 pt-2 border-t border-gray-200 dark:border-[#1F1F1F]">
+      {/* New page row */}
+      <div className="px-2 pb-3 pt-1 border-t border-[#E9E9E8] dark:border-[#2D2D2D]">
         <button
           onClick={() => createPage(null)}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-[13px] font-medium shadow-sm transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] text-[#37352F]/65 dark:text-white/50 hover:bg-[#37352F]/[0.05] dark:hover:bg-white/[0.04] hover:text-[#37352F] dark:hover:text-white transition-colors"
         >
-          <Plus size={14} />
+          <Plus size={14} className="text-[#9B9A97] dark:text-[#6B6B6B]" />
           New page
         </button>
       </div>
 
       {/* Resize handle */}
       <div
-        className="absolute top-0 right-0 w-[3px] h-full cursor-col-resize hover:bg-indigo-400/30 active:bg-indigo-500/50 transition-colors"
+        className="absolute top-0 right-0 w-[3px] h-full cursor-col-resize hover:bg-[#37352F]/[0.15] dark:hover:bg-white/[0.1] transition-colors"
         onMouseDown={onMouseDown}
       />
     </aside>

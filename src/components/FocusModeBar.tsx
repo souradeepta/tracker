@@ -12,7 +12,7 @@ export function FocusModeBar({ onExport }: Props) {
   const page = activePageId ? pages[activePageId] : null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-2.5 bg-white/90 dark:bg-[#0F0F0F]/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800/60">
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-2.5 bg-white/90 dark:bg-[#191919]/90 backdrop-blur-xl border-b border-[#E9E9E8] dark:border-[#2D2D2D]">
       <div className="flex items-center gap-2.5">
         <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
           <span className="text-white text-[10px] font-bold">T</span>
@@ -33,14 +33,14 @@ export function FocusModeBar({ onExport }: Props) {
           <>
             <button
               onClick={() => toggleLocked(page.id)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors"
               title={page.locked ? "Unlock page" : "Lock page"}
             >
               {page.locked ? <Unlock size={14} /> : <Lock size={14} />}
             </button>
             <button
               onClick={() => onExport(page.id)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#9B9A97] dark:text-[#6B6B6B] hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.05] hover:text-[#37352F] dark:hover:text-white transition-colors"
               title="Export as Markdown"
             >
               <Download size={14} />
@@ -49,7 +49,7 @@ export function FocusModeBar({ onExport }: Props) {
         )}
         <button
           onClick={toggleFocusMode}
-          className="flex items-center gap-1.5 text-[12px] text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl px-3 py-1.5 font-medium transition-colors"
+          className="flex items-center gap-1.5 text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white bg-[#EBEBEA] dark:bg-white/[0.05] hover:bg-[#E4E3DF] dark:hover:bg-white/[0.08] rounded-xl px-3 py-1.5 font-medium transition-colors"
           title="Exit focus mode (⌘⇧F)"
         >
           <X size={12} /> Exit focus

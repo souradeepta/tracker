@@ -102,28 +102,28 @@ export default function App() {
         {/* Main area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* View toggle bar */}
-          <div className="flex items-center gap-1 px-3 py-1.5 border-b border-gray-200 dark:border-gray-800/60 bg-white dark:bg-[#0F0F0F]">
-            <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-gray-800/60 rounded-xl p-0.5">
+          <div className="flex items-center gap-1 px-3 py-1.5 border-b border-[#E9E9E8] dark:border-[#2D2D2D] bg-white dark:bg-[#191919]">
+            <div className="flex items-center gap-0.5 bg-[#EBEBEA] dark:bg-white/[0.05] rounded-lg p-0.5">
               <button
                 onClick={() => setViewMode("notes")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "notes"
-                    ? "bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm"
-                    : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
+                    : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
               >
                 <FileText size={12} /> Notes
               </button>
               <button
                 onClick={() => setViewMode("board")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all
                   ${viewMode === "board"
-                    ? "bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 shadow-sm"
-                    : "text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}
+                    ? "bg-white dark:bg-[#2A2A2A] text-[#37352F] dark:text-white shadow-sm"
+                    : "text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white"}`}
               >
                 <LayoutGrid size={12} /> Board
               </button>
             </div>
-            <span className="ml-auto text-[10px] text-gray-300 dark:text-gray-700 font-mono hidden sm:block select-none">
+            <span className="ml-auto text-[10px] text-[#C4C3BF] dark:text-[#444444] font-mono hidden sm:block select-none">
               press ? for shortcuts
             </span>
           </div>

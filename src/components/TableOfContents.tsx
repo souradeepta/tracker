@@ -37,10 +37,10 @@ export function TableOfContents({ editor }: { editor: BlockNoteEditor }) {
   if (headings.length === 0) return null;
 
   return (
-    <div className="hidden xl:flex flex-col w-52 flex-shrink-0 pt-16 px-4 border-l border-gray-100 dark:border-neutral-800">
+    <div className="hidden xl:flex flex-col w-52 flex-shrink-0 pt-16 px-4 border-l border-[#E9E9E8] dark:border-[#2D2D2D]">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide mb-2 hover:text-gray-700"
+        className="flex items-center gap-1.5 text-[11px] font-semibold text-[#9B9A97] dark:text-[#6B6B6B] uppercase tracking-widest mb-2 hover:text-[#37352F] dark:hover:text-white transition-colors"
       >
         <List size={12} />
         On this page
@@ -50,7 +50,7 @@ export function TableOfContents({ editor }: { editor: BlockNoteEditor }) {
           {headings.map((h) => (
             <button
               key={h.id}
-              className="text-left text-xs text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-neutral-100 truncate py-0.5 transition-colors"
+              className="text-left text-[12px] text-[#9B9A97] dark:text-[#6B6B6B] hover:text-[#37352F] dark:hover:text-white truncate py-0.5 transition-colors"
               style={{ paddingLeft: `${(h.level - 1) * 10}px` }}
               onClick={() => {
                 const el = document.querySelector(`[data-id="${h.id}"]`);
