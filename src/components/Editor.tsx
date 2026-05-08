@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import type { PartialBlock } from "@blocknote/core";
-import { Lock, Unlock, Clock, FileText, Layers, Search, Keyboard } from "lucide-react";
+import {
+  Lock, Unlock, Clock, FileText, Layers, Search, Keyboard,
+  LayoutGrid, Zap, Tag,
+} from "lucide-react";
 import { usePageStore } from "../store/pages";
 import { useSettingsStore } from "../store/settings";
 import { estimateReadingTime } from "../lib/readingTime";
@@ -34,7 +37,7 @@ function IconPicker({ icon, pageId, locked }: { icon: string; pageId: string; lo
   return (
     <div className="relative" ref={ref}>
       <button
-        className="text-5xl hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.06] rounded-lg p-1.5 transition-colors disabled:cursor-default"
+        className="text-5xl hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-xl p-1.5 transition-colors disabled:cursor-default"
         onClick={() => !locked && setOpen((v) => !v)}
         title={locked ? "Page is locked" : "Change icon"}
         disabled={locked}
@@ -42,11 +45,11 @@ function IconPicker({ icon, pageId, locked }: { icon: string; pageId: string; lo
         {icon}
       </button>
       {open && !locked && (
-        <div className="absolute top-16 left-0 z-50 bg-white dark:bg-[#1f1f1f] border border-[#37352F]/10 dark:border-white/10 rounded-xl shadow-2xl p-3 grid grid-cols-8 gap-1 w-72">
+        <div className="absolute top-16 left-0 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-3 grid grid-cols-8 gap-1 w-72">
           {EMOJI_OPTIONS.map((e) => (
             <button
               key={e}
-              className="text-xl hover:bg-[#37352F]/[0.06] dark:hover:bg-white/[0.06] rounded-lg p-1.5 transition-colors"
+              className="text-xl hover:bg-gray-100 dark:hover:bg-white/[0.06] rounded-xl p-1.5 transition-colors"
               onClick={() => { updateIcon(pageId, e); setOpen(false); }}
             >
               {e}
@@ -72,21 +75,49 @@ function WordCount({ editor }: { editor: ReturnType<typeof useCreateBlockNote> }
   }, [editor]);
   const readingMins = estimateReadingTime(count);
   return (
-    <div className="flex items-center gap-3 text-[12px] text-[#37352F]/35 dark:text-white/25">
+    <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-gray-600">
       <span>{count} {count === 1 ? "word" : "words"}</span>
-      <span className="flex items-center gap-1">
-        <Clock size={10} /> {readingMins} min read
-      </span>
+      <span className="flex items-center gap-1"><Clock size={10} /> {readingMins} min read</span>
     </div>
   );
 }
 
-// ─── Empty state shown when no page is selected ──────────────────────────────
+// ─── Feature card in empty state ─────────────────────────────────────────────
+function FeatureCard({
+  icon, title, desc, shortcut, onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  shortcut?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col items-start gap-2 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md hover:shadow-indigo-100 dark:hover:shadow-indigo-900/20 transition-all text-left"
+    >
+      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+        {icon}
+      </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <p className="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{title}</p>
+          {shortcut && (
+            <kbd className="text-[10px] font-mono bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 px-1.5 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700">
+              {shortcut}
+            </kbd>
+          )}
+        </div>
+        <p className="text-[12px] text-gray-400 dark:text-gray-500 mt-0.5">{desc}</p>
+      </div>
+    </button>
+  );
+}
+
+// ─── Empty state ─────────────────────────────────────────────────────────────
 function EmptyState({
-  onNew,
-  onSearch,
-  onTemplates,
-  onShortcuts,
+  onNew, onSearch, onTemplates, onShortcuts,
 }: {
   onNew: () => void;
   onSearch: () => void;
@@ -94,96 +125,100 @@ function EmptyState({
   onShortcuts: () => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-[#191919] px-8 select-none">
-      <div className="w-full max-w-lg text-center">
-        {/* Logo */}
-        <div className="w-14 h-14 rounded-2xl bg-[#37352F] dark:bg-white flex items-center justify-center mx-auto mb-5 shadow-lg">
-          <span className="text-white dark:text-[#191919] text-2xl font-bold">T</span>
+    <div className="flex-1 flex flex-col items-center justify-center bg-gray-50/30 dark:bg-[#0F0F0F] overflow-y-auto py-12 px-6">
+      <div className="w-full max-w-2xl">
+        {/* Hero */}
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/40">
+            <span className="text-white text-3xl font-bold">T</span>
+          </div>
+          <h1 className="text-[28px] font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+            Welcome to Tracker
+          </h1>
+          <p className="text-[15px] text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+            Your all-in-one workspace for notes, tasks, and knowledge.
+          </p>
         </div>
-        <h1 className="text-[22px] font-semibold text-[#37352F] dark:text-white mb-1">Tracker</h1>
-        <p className="text-[13px] text-[#37352F]/50 dark:text-white/40 mb-8">
-          Your personal knowledge workspace
-        </p>
 
-        {/* Quick actions */}
-        <div className="flex gap-3 justify-center mb-10">
-          <button
+        {/* Feature cards */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          <FeatureCard
+            icon={<FileText size={18} />}
+            title="New page"
+            desc="Create a blank page and start writing"
+            shortcut="⌘N"
             onClick={onNew}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#37352F] dark:bg-white text-white dark:text-[#191919] text-[13px] font-medium hover:bg-[#37352F]/90 dark:hover:bg-white/90 transition-colors shadow-sm"
-          >
-            <FileText size={14} />
-            New page
-            <kbd className="ml-1 text-[10px] opacity-60 font-mono">⌘N</kbd>
-          </button>
-          <button
+          />
+          <FeatureCard
+            icon={<Search size={18} />}
+            title="Search"
+            desc="Jump to any page instantly"
+            shortcut="⌘K"
             onClick={onSearch}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#37352F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] text-[#37352F]/70 dark:text-white/70 text-[13px] font-medium hover:bg-[#37352F]/[0.04] dark:hover:bg-white/[0.1] transition-colors"
-          >
-            <Search size={14} />
-            Search
-            <kbd className="ml-1 text-[10px] opacity-60 font-mono">⌘K</kbd>
-          </button>
-          <button
+          />
+          <FeatureCard
+            icon={<Layers size={18} />}
+            title="Templates"
+            desc="Start from a meeting, project, or daily note"
+            shortcut="⌘⇧T"
             onClick={onTemplates}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#37352F]/15 dark:border-white/15 bg-white dark:bg-white/[0.06] text-[#37352F]/70 dark:text-white/70 text-[13px] font-medium hover:bg-[#37352F]/[0.04] dark:hover:bg-white/[0.1] transition-colors"
-          >
-            <Layers size={14} />
-            Templates
-          </button>
+          />
+          <FeatureCard
+            icon={<LayoutGrid size={18} />}
+            title="Board view"
+            desc="Manage pages by status on a Kanban board"
+            shortcut="⌘⇧B"
+            onClick={() => {}}
+          />
         </div>
 
         {/* Shortcut reference */}
-        <div className="bg-[#F7F6F3] dark:bg-white/[0.04] rounded-2xl p-5 text-left mb-6 border border-[#37352F]/[0.06] dark:border-white/[0.06]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#37352F]/40 dark:text-white/30 mb-3">
-            Keyboard shortcuts
-          </p>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/40 overflow-hidden mb-6">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+            <p className="text-[12px] font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <Keyboard size={13} className="text-indigo-500" />
+              Keyboard shortcuts
+            </p>
+            <button
+              onClick={onShortcuts}
+              className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+            >
+              View all →
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 p-5">
             {[
-              ["⌘ N", "New page"],
-              ["⌘ K", "Search"],
               ["⌘ ⇧ F", "Focus mode"],
-              ["⌘ ⇧ B", "Board view"],
-              ["⌘ ⇧ T", "Templates"],
               ["⌘ ⇧ G", "Tag browser"],
               ["⌘ ⇧ D", "Dark mode"],
-              ["/", "Block commands"],
+              ["/", "Insert block"],
+              ["Right-click", "Page actions"],
+              ["?", "All shortcuts"],
             ].map(([key, desc]) => (
               <div key={key} className="flex items-center justify-between gap-2">
-                <span className="text-[12px] text-[#37352F]/60 dark:text-white/50">{desc}</span>
-                <kbd className="text-[10px] font-mono text-[#37352F]/50 dark:text-white/40 bg-white dark:bg-white/[0.08] border border-[#37352F]/12 dark:border-white/12 rounded px-1.5 py-0.5 flex-shrink-0">
+                <span className="text-[12px] text-gray-500 dark:text-gray-400">{desc}</span>
+                <kbd className="text-[10px] font-mono bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700 flex-shrink-0">
                   {key}
                 </kbd>
               </div>
             ))}
           </div>
-          <button
-            onClick={onShortcuts}
-            className="mt-3 flex items-center gap-1.5 text-[11px] text-[#37352F]/40 dark:text-white/30 hover:text-[#37352F]/70 dark:hover:text-white/60 transition-colors"
-          >
-            <Keyboard size={11} />
-            View all shortcuts
-          </button>
         </div>
 
         {/* Tips */}
-        <div className="text-left">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#37352F]/40 dark:text-white/30 mb-2">
-            Tips
-          </p>
-          <ul className="space-y-1.5">
-            {[
-              "Type / inside any page to insert headings, lists, code blocks, and more.",
-              "Right-click any page in the sidebar to duplicate, favorite, or lock it.",
-              "Click the emoji icon on a page to change it. Hover the top of a page to add a cover.",
-              "Set status and priority on pages, then switch to Board view to manage them.",
-              "Use tags to organise pages across topics — browse them with ⌘⇧G.",
-            ].map((tip) => (
-              <li key={tip} className="flex items-start gap-2 text-[12px] text-[#37352F]/55 dark:text-white/40">
-                <span className="text-[#37352F]/25 dark:text-white/20 mt-0.5 flex-shrink-0">→</span>
-                {tip}
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-600 px-1">Tips</p>
+          {[
+            { icon: <Zap size={11} />, text: "Type / inside any page to insert headings, lists, code blocks, and more" },
+            { icon: <Tag size={11} />, text: "Add tags to pages and browse them with ⌘⇧G to find related content" },
+            { icon: <Lock size={11} />, text: "Lock a page from the footer to prevent accidental edits" },
+            { icon: <LayoutGrid size={11} />, text: "Set status on pages (Todo, In Progress, Done) and track them on the Board" },
+          ].map(({ icon, text }) => (
+            <div key={text} className="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-white dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/50">
+              <span className="text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0">{icon}</span>
+              <p className="text-[12px] text-gray-500 dark:text-gray-400">{text}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -209,9 +244,7 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useCreateBlockNote(
-    {
-      initialContent: activePage?.content?.length ? (activePage.content as PartialBlock[]) : undefined,
-    },
+    { initialContent: activePage?.content?.length ? (activePage.content as PartialBlock[]) : undefined },
     [activePageId]
   );
 
@@ -224,15 +257,12 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
     }
   }, [localTitle]);
 
-  const handleTitleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const val = e.target.value;
-      setLocalTitle(val);
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => { if (activePageId) updateTitle(activePageId, val); }, 300);
-    },
-    [activePageId, updateTitle]
-  );
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setLocalTitle(val);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => { if (activePageId) updateTitle(activePageId, val); }, 300);
+  }, [activePageId, updateTitle]);
 
   const handleEditorChange = useCallback(() => {
     if (!activePageId || activePage?.locked) return;
@@ -254,15 +284,11 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
   }
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-white dark:bg-[#191919]">
+    <div className="flex-1 flex overflow-hidden bg-white dark:bg-[#0F0F0F]">
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Cover */}
         <Cover pageId={activePage.id} cover={activePage.cover} />
-
-        {/* Property panel */}
         <PropertyPanel pageId={activePage.id} />
 
-        {/* Page body */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-16 pt-8 pb-32">
             <Breadcrumbs pageId={activePage.id} />
@@ -270,7 +296,7 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
             <div className="mb-1 mt-2 flex items-end gap-3">
               <IconPicker icon={activePage.icon} pageId={activePage.id} locked={activePage.locked} />
               {activePage.locked && (
-                <span className="mb-2 flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700/40">
+                <span className="mb-2 flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-700/40 font-medium">
                   <Lock size={9} /> Locked
                 </span>
               )}
@@ -278,8 +304,8 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
 
             <textarea
               ref={titleRef}
-              className="w-full text-[40px] font-bold text-[#37352F] dark:text-white/90 resize-none border-none outline-none bg-transparent
-                placeholder-[#37352F]/20 dark:placeholder-white/15 leading-tight mb-4 overflow-hidden tracking-tight"
+              className="w-full text-[40px] font-bold text-gray-900 dark:text-gray-50 resize-none border-none outline-none bg-transparent
+                placeholder-gray-200 dark:placeholder-gray-800 leading-tight mb-4 overflow-hidden tracking-tight"
               placeholder="Untitled"
               value={localTitle}
               onChange={handleTitleChange}
@@ -298,15 +324,15 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-16 py-2 border-t border-[#37352F]/[0.08] dark:border-white/[0.08]">
+        <div className="flex items-center justify-between px-16 py-2.5 border-t border-gray-100 dark:border-gray-800/60">
           <WordCount editor={editor} />
           <div className="flex items-center gap-4">
-            <span className="text-[12px] text-[#37352F]/30 dark:text-white/25">
+            <span className="text-[11px] text-gray-300 dark:text-gray-700">
               Updated {new Date(activePage.updatedAt).toLocaleDateString()}
             </span>
             <button
               onClick={() => activePageId && toggleLocked(activePageId)}
-              className="text-[12px] text-[#37352F]/35 dark:text-white/30 hover:text-[#37352F]/70 dark:hover:text-white/70 flex items-center gap-1 transition-colors"
+              className="text-[11px] text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1 transition-colors"
               title={activePage.locked ? "Unlock page" : "Lock page"}
             >
               {activePage.locked ? <Unlock size={11} /> : <Lock size={11} />}
@@ -314,7 +340,7 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
             </button>
             <button
               onClick={() => onExport(activePage.id)}
-              className="text-[12px] text-[#37352F]/35 dark:text-white/30 hover:text-[#37352F]/70 dark:hover:text-white/70 transition-colors"
+              className="text-[11px] text-gray-400 dark:text-gray-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
               Export .md
             </button>
@@ -322,7 +348,6 @@ export function Editor({ onExport, onNew, onSearch, onTemplates, onShortcuts }: 
         </div>
       </div>
 
-      {/* Table of contents */}
       <TableOfContents editor={editor} />
     </div>
   );
