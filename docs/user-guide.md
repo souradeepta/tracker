@@ -1,8 +1,8 @@
 # User Guide
 
-A Notion-inspired note-taking app that runs entirely in your browser. All data is stored locally in your browser's `localStorage` — no account, no server, no sync required.
+A Notion-inspired note-taking app that runs entirely in your browser. Pages are stored locally in your browser's IndexedDB database — no account, no server, no sync required. Display preferences are stored separately in localStorage.
 
-> **Important — data storage:** Everything you create lives in your browser's localStorage under the key `notion-clone-pages`. This means your data is tied to the specific browser and device you use. Clearing browser storage, switching browsers, or using a different device will result in an empty workspace. Export important pages regularly as Markdown files to keep offline backups.
+> **Important — data storage:** Everything you create lives in your browser's IndexedDB storage in the `tracker-db` database. This means your data is tied to the specific browser and device you use. Clearing browser storage, switching browsers, or using a different device will result in an empty workspace. Export important pages regularly as Markdown files to keep offline backups.
 
 ---
 
@@ -785,7 +785,7 @@ Using different cover gradients for different projects gives you instant visual 
 After filling in the Meeting Notes template for your first meeting, duplicate it before the next meeting instead of starting from the template again. The duplicate keeps your section structure, and you just clear the content in each section.
 
 **7. Export before clearing browser data**
-All data lives in localStorage. Clearing your browser's cache or site data will delete your entire workspace with no recovery option. Before clearing storage, use "Export .md" on each important page to save local copies.
+Page data lives in IndexedDB. Clearing your browser's cache or site data will delete your entire workspace with no recovery option. Before clearing storage, use "Export .md" on each important page to save local copies.
 
 **8. Use check list blocks to track project progress**
 The checked/unchecked state of check list items is persisted and exported. A page with ten check list items becomes a lightweight progress tracker — you can see at a glance how many items are done.
@@ -810,7 +810,7 @@ Instead of one page with 2000 words and many heading sections, consider creating
 ## FAQ
 
 **Q: Is my data backed up anywhere?**
-No. The app is fully client-side. Data lives only in your browser's localStorage under the key `notion-clone-pages`. If you clear browser data, use a private/incognito window, switch to a different browser, or use a different device, your pages will not be there. Export regularly as Markdown files for personal backup.
+No. The app is fully client-side. Data lives only in your browser's IndexedDB storage. If you clear browser data, use a private/incognito window, switch to a different browser, or use a different device, your pages will not be there. Export regularly as Markdown files for personal backup.
 
 **Q: Can I access my pages on another device or browser?**
 Not currently. There is no backend, sync, or import/export JSON feature. Your workspace is local to the specific browser profile where you created it.

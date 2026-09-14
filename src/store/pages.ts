@@ -71,6 +71,28 @@ function saveNav(state: { activePageId: string | null; expandedIds: string[]; re
     .catch(() => {/* ignore write errors */});
 }
 
+function hasIndexedDb() {
+  return typeof indexedDB !== "undefined";
+}
+
+function readLegacyPages() {
+  try {
+    return typeof localStorage === "undefined" ? null : localStorage.getItem("notion-clone-pages");
+  } catch {
+    return null;
+  }
+}
+
+function removeLegacyPages() {
+  try {
+    localStorage.removeItem("notion-clone-pages");
+  } catch {
+    // Ignore storage access errors in privacy-restricted contexts.
+  }
+}
+
+let initializationPromise: Promise<void> | null = null;
+
 export const usePageStore = create<PageStore>()((set, get) => ({
   pages: {},
   activePageId: null,
@@ -137,12 +159,15 @@ export const usePageStore = create<PageStore>()((set, get) => ({
     });
     const updated = trashedIds.map((pid) => get().pages[pid]).filter(Boolean) as Page[];
     db.pages.bulkPut(updated).catch(() => {});
+    saveNav(get());
   },
 
   restorePage: (id) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], deleted: false, deletedAt: null } } }));
     const page = get().pages[id];
     if (page) db.pages.put(page).catch(() => {});
+    saveNav(get());
   },
 
   permanentDelete: (id) => {
@@ -166,6 +191,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
     const trashedIds = Object.values(get().pages).filter((p) => p.deleted).map((p) => p.id);
     set((state) => ({ pages: Object.fromEntries(Object.entries(state.pages).filter(([, p]) => !p.deleted)) }));
     db.pages.bulkDelete(trashedIds).catch(() => {});
+    saveNav(get());
   },
 
   updateTitle: (id, title) => {
@@ -246,44 +272,63 @@ export const usePageStore = create<PageStore>()((set, get) => ({
     return Array.from(tagSet).sort();
   },
 
-  initializeIfEmpty: async () => {
-    // Migrate from localStorage if old data exists
-    const oldRaw = localStorage.getItem("notion-clone-pages");
-    if (oldRaw) {
-      try {
-        const old = JSON.parse(oldRaw) as { state?: { pages?: Record<string, Page>; activePageId?: string | null; expandedIds?: string[]; recentPageIds?: string[] } };
-        const oldPages = Object.values(old?.state?.pages ?? {});
-        if (oldPages.length > 0) {
-          await db.pages.bulkPut(oldPages);
-          await db.nav.put({
-            key: "state",
-            activePageId: old?.state?.activePageId ?? null,
-            expandedIds: old?.state?.expandedIds ?? [],
-            recentPageIds: old?.state?.recentPageIds ?? [],
-          });
-        }
-      } catch { /* ignore */ }
-      localStorage.removeItem("notion-clone-pages");
+  initializeIfEmpty: () => {
+    // Keep initialization synchronous when IndexedDB is unavailable (for
+    // example in JSDOM or a privacy-restricted browser context). All normal
+    // writes are already best-effort, so this fallback keeps the app usable
+    // without producing an unhandled Dexie rejection.
+    if (!hasIndexedDb()) {
+      if (Object.keys(get().pages).length === 0) {
+        const { createPage } = get();
+        createPage(null, { title: "Getting Started", icon: "🚀" });
+      }
+      set({ loaded: true });
+      return Promise.resolve();
     }
 
-    const [allPages, navState] = await Promise.all([db.pages.toArray(), db.nav.get("state")]);
+    if (get().loaded) return Promise.resolve();
+    if (initializationPromise) return initializationPromise;
 
-    if (allPages.length > 0) {
-      const pagesRecord = Object.fromEntries(allPages.map((p) => [p.id, p]));
-      set({
-        pages: pagesRecord,
-        activePageId: navState?.activePageId ?? null,
-        expandedIds: navState?.expandedIds ?? [],
-        recentPageIds: (navState?.recentPageIds ?? []).filter((id) => !!pagesRecord[id]),
-        loaded: true,
-      });
-      return;
-    }
+    initializationPromise = (async () => {
+      // Migrate from localStorage if old data exists
+      const oldRaw = readLegacyPages();
+      if (oldRaw) {
+        let migrated = false;
+        try {
+          const old = JSON.parse(oldRaw) as { state?: { pages?: Record<string, Page>; activePageId?: string | null; expandedIds?: string[]; recentPageIds?: string[] } };
+          const oldPages = Object.values(old?.state?.pages ?? {});
+          if (oldPages.length > 0) {
+            await db.pages.bulkPut(oldPages);
+            await db.nav.put({
+              key: "state",
+              activePageId: old?.state?.activePageId ?? null,
+              expandedIds: old?.state?.expandedIds ?? [],
+              recentPageIds: old?.state?.recentPageIds ?? [],
+            });
+            migrated = true;
+          }
+        } catch { /* preserve malformed data for a future recovery attempt */ }
+        if (migrated) removeLegacyPages();
+      }
 
-    set({ loaded: true });
-    const { createPage, updateContent } = get();
-    const id = createPage(null, { title: "Getting Started", icon: "🚀" });
-    updateContent(id, [
+      const [allPages, navState] = await Promise.all([db.pages.toArray(), db.nav.get("state")]);
+
+      if (allPages.length > 0) {
+        const pagesRecord = Object.fromEntries(allPages.map((p) => [p.id, p]));
+        set({
+          pages: pagesRecord,
+          activePageId: navState?.activePageId ?? null,
+          expandedIds: navState?.expandedIds ?? [],
+          recentPageIds: (navState?.recentPageIds ?? []).filter((id) => !!pagesRecord[id]),
+          loaded: true,
+        });
+        return;
+      }
+
+      set({ loaded: true });
+      const { createPage, updateContent } = get();
+      const id = createPage(null, { title: "Getting Started", icon: "🚀" });
+      updateContent(id, [
       { type: "heading", props: { level: 1, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Welcome to Tracker 👋", styles: {} }], children: [] },
       { type: "paragraph", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Tracker is your personal knowledge workspace — a place to capture ideas, track projects, and organize your thoughts.", styles: {} }], children: [] },
       { type: "heading", props: { level: 2, textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Quick start", styles: {} }], children: [] },
@@ -296,6 +341,11 @@ export const usePageStore = create<PageStore>()((set, get) => ({
       { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Use ", styles: {} }, { type: "text", text: "tags", styles: { bold: true } }, { type: "text", text: " to cross-link pages across topics (⌘⇧G to browse).", styles: {} }], children: [] },
       { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Add a ", styles: {} }, { type: "text", text: "cover image", styles: { bold: true } }, { type: "text", text: " — hover above the page title.", styles: {} }], children: [] },
       { type: "paragraph", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Feel free to delete this page whenever you're ready. Happy writing! ✨", styles: { italic: true } }], children: [] },
-    ] as Parameters<typeof updateContent>[1]);
+      ] as Parameters<typeof updateContent>[1]);
+    })().finally(() => {
+      initializationPromise = null;
+    });
+
+    return initializationPromise;
   },
 }));

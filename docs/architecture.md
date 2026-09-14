@@ -21,7 +21,7 @@ Technical architecture reference for the Notion-clone web app.
 
 ## System Overview
 
-The app is a **single-page application (SPA)** with no backend. All data flows between three layers: the React component tree, the Zustand state stores, and the browser's localStorage.
+The app is a **single-page application (SPA)** with no backend. Page data flows between the React component tree, the Zustand state store, and the browser's IndexedDB database through Dexie. Small UI preferences continue to use localStorage.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -66,20 +66,16 @@ The app is a **single-page application (SPA)** with no backend. All data flows b
 │  │  │   toggleExpand()                                             │   │  │
 │  │  │   toggleFavorite()                                           │   │  │
 │  │  └────────────────────────────┬──────────────────────────────── ┘   │  │
-│  │                               │  persist middleware                   │  │
-│  │                               │  JSON.stringify on every set()        │  │
+│  │                               │  Dexie persistence                    │  │
+│  │                               │  async page/nav writes                │  │
 │  └───────────────────────────────┼───────────────────────────────────── ┘  │
 │                                  ▼                                          │
 │  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │                          localStorage                                  │  │
+│  │                     Browser storage                                    │  │
 │  │                                                                        │  │
-│  │   "notion-clone-pages"              "notion-clone-settings"            │  │
-│  │   {                                 {                                  │  │
-│  │     pages: { [uuid]: Page, ... },     dark: false,                    │  │
-│  │     activePageId: "uuid"|null,        sidebarWidth: 240,              │  │
-│  │     expandedIds: ["uuid", ...],       sidebarCollapsed: false         │  │
-│  │     recentPageIds: ["uuid", ...]    }                                  │  │
-│  │   }                                                                    │  │
+│  │   IndexedDB: tracker-db              localStorage: settings            │  │
+│  │   pages table                         { dark, sidebarWidth, ... }       │  │
+│  │   nav table                           (UI preferences only)             │  │
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 │  External library surface:                                                  │
@@ -97,12 +93,12 @@ The app is a **single-page application (SPA)** with no backend. All data flows b
 1. **User interaction** (click, keystroke) triggers an event handler in a component.
 2. The handler calls a **Zustand store action**.
 3. The action calls Zustand's `set(state => newState)`.
-4. Zustand's **persist middleware** serialises the new state to localStorage.
+4. The store action updates Zustand immediately and schedules a best-effort Dexie write to IndexedDB.
 5. Zustand **notifies all subscribers** (components that called `usePageStore()` or `useSettingsStore()`).
 6. React **re-renders** the subscribing components.
 7. The updated UI is painted.
 
-The flow is strictly one-directional: interaction → store → localStorage → UI. There is no two-way binding and no derived state stored in the Zustand stores (derivations happen inline during render).
+The flow is strictly one-directional: interaction → store → IndexedDB write → UI. Initial page hydration is asynchronous and the app displays a loading state until it completes. There is no two-way binding and no derived state stored in the Zustand stores (derivations happen inline during render).
 
 ---
 
@@ -130,7 +126,7 @@ interface Page {
 }
 ```
 
-`PartialBlock` is BlockNote's own type (`@blocknote/core`). It represents a single block node — paragraph, heading, list item, etc. — including its inline content (styled text runs) and optional nested blocks. It is fully JSON-serialisable, which is what allows it to be persisted in localStorage via Zustand.
+`PartialBlock` is BlockNote's own type (`@blocknote/core`). It represents a single block node — paragraph, heading, list item, etc. — including its inline content (styled text runs) and optional nested blocks. It is fully JSON-serialisable, which is what allows it to be persisted as a page record in IndexedDB.
 
 ### Template — `src/types.ts`
 
@@ -316,12 +312,10 @@ App (src/App.tsx)
 
 ### How Zustand stores are created
 
-Both stores use the pattern:
+The stores use Zustand directly. Page records are persisted explicitly through Dexie; the settings store uses Zustand's localStorage persist middleware because its values are small UI preferences.
 
 ```ts
-export const usePageStore = create<PageStore>()(
-  persist(
-    (set) => ({
+export const usePageStore = create<PageStore>()((set) => ({
       // initial state
       pages: {},
       activePageId: null,
@@ -336,46 +330,30 @@ export const usePageStore = create<PageStore>()(
         }));
         return page.id;
       },
-    }),
-    { name: "notion-clone-pages", partialize: ... }
-  )
-);
+}));
 ```
 
-`create<PageStore>()` returns a factory that builds the store hook. The double-call `create<T>()()` is Zustand's TypeScript-safe curried API. `persist` is middleware that wraps the factory.
+`create<PageStore>()` returns a factory that builds the store hook. The double-call `create<T>()()` is Zustand's TypeScript-safe curried API.
 
-### The persist middleware
+### Dexie persistence
 
 ```ts
-persist(factory, {
-  name: "notion-clone-pages",    // localStorage key
-  partialize: (state) => ({      // which fields to serialise
-    pages: state.pages,
-    activePageId: state.activePageId,
-    expandedIds: state.expandedIds,
-    recentPageIds: state.recentPageIds,
-  }),
-})
+class TrackerDB extends Dexie {
+  pages!: Table<Page, string>;
+  nav!: Table<NavState, string>;
+}
 ```
 
 **On app startup (hydration):**
-1. `persist` reads `localStorage.getItem("notion-clone-pages")`.
-2. If present, parses the JSON with `JSON.parse`.
-3. Calls Zustand's `set` with the parsed object, merging it into the initial state via a shallow merge.
-4. The merge preserves any action functions in the initial state (which were not serialised and therefore not in the parsed object).
+1. The store checks for legacy `notion-clone-pages` localStorage data.
+2. Valid legacy records are copied into the Dexie `pages` and `nav` tables, then the legacy key is removed.
+3. Dexie loads page records and navigation state asynchronously.
+4. The store marks `loaded` and the app renders the workspace.
 
-**On every `set` call:**
-1. The new state is computed.
-2. `persist` intercepts the update.
-3. `partialize` extracts the data fields (excluding action functions).
-4. `JSON.stringify` serialises the extracted object.
-5. `localStorage.setItem(name, serialised)` writes synchronously.
-
-The entire localStorage write happens synchronously within the same event loop tick as the state update. This means there is zero latency between state change and persistence.
-
-### Why partialize is necessary
-
-Zustand action functions are JavaScript closures. `JSON.stringify` either silently drops them (object values that are functions are `undefined` in JSON) or — in strict mode — could throw. Using `partialize` explicitly lists only the data fields to serialize, providing a clear contract about what is persisted and what is ephemeral.
+**On a page mutation:**
+1. The new state is computed and applied synchronously to Zustand.
+2. The changed page is written to `db.pages`, or navigation state is written to `db.nav`.
+3. Persistence is asynchronous and best-effort; write failures do not block the editor UI.
 
 ### Subscribing to store state
 
@@ -389,11 +367,9 @@ Zustand's default behaviour is to trigger a re-render whenever any value in the 
 
 **Why this is acceptable:** The components that subscribe to `usePageStore` — `Sidebar`, `Editor`, `SearchModal`, `TemplatesModal`, and several sub-components — all have a legitimate reason to re-render when the page list or active page changes. The component tree is not large enough for this to cause performance issues.
 
-### What happens when localStorage is full
+### IndexedDB write failures
 
-When `localStorage.setItem` would exceed the origin quota (~5–10 MB), it throws a `DOMException` (`QuotaExceededError`). Zustand's `persist` middleware does not wrap this call in a try/catch. The exception propagates as an uncaught error. In practice, this is unlikely for a text-only workspace but becomes a risk for large workspaces.
-
-**Current mitigation:** Users are advised to empty the trash and export/delete old pages. A future improvement could wrap the localStorage write in a try/catch and display a warning.
+Dexie writes are intentionally best-effort. A failed write leaves the current in-memory state usable and is caught so it does not create an unhandled rejection. The next reload may not contain the failed mutation; users should export important pages as Markdown backups.
 
 ---
 
@@ -573,16 +549,16 @@ The `Math.min` clamps ensure the menu stays within the viewport even when right-
 
 ---
 
-### Decision 3: No backend — localStorage only
+### Decision 3: No backend — browser storage only
 
-**Decision made:** All persistence is via Zustand's `persist` middleware writing to `localStorage`.
+**Decision made:** Page content and navigation state use IndexedDB through Dexie. Small UI preferences use localStorage.
 
 **Alternatives considered:**
 - IndexedDB (more storage capacity, async API).
 - A lightweight backend (Node + SQLite).
 - Sync to a cloud service (Supabase, Firebase).
 
-**Reason chosen:** The goal is a zero-infrastructure, zero-auth note-taking app. localStorage provides synchronous reads/writes (no async complexity), is universally supported, and is sufficient for the target workspace size. IndexedDB was considered but its async API would require significant architectural changes (async store actions, loading states). A backend was ruled out as out of scope for a client-only tool.
+**Reason chosen:** The goal is a zero-infrastructure, zero-auth note-taking app. IndexedDB provides substantially more room for rich page content than localStorage, while Dexie's async API is isolated behind store initialization and best-effort mutation writes. A backend was ruled out as out of scope for a client-only tool.
 
 ---
 

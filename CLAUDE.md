@@ -6,13 +6,14 @@ This file is loaded automatically by Claude Code when working in this directory.
 
 ## Project Overview
 
-A Notion-clone single-page application built with React 19, TypeScript, and BlockNote. All data is stored client-side in `localStorage` via Zustand's `persist` middleware — there is no backend. The UI follows Notion's layout: a resizable sidebar for page navigation and an editor panel for rich-text content.
+A Notion-clone single-page application built with React 19, TypeScript, and BlockNote. Page content is stored client-side in IndexedDB through Dexie, while small UI preferences remain in localStorage — there is no backend. The UI follows Notion's layout: a resizable sidebar for page navigation and an editor panel for rich-text content.
 
 **Tech stack:**
 - React 19 + TypeScript (strict)
 - Vite 8 (bundler / dev server)
 - BlockNote 0.50.x (`@blocknote/core`, `@blocknote/react`, `@blocknote/mantine`) — rich text editor
-- Zustand 5 with `persist` middleware — state management
+- Zustand 5 — state management
+- Dexie 4 — IndexedDB persistence for pages and navigation state
 - Tailwind CSS 4 (class-based dark mode via `darkMode: "class"`)
 - Mantine 9 (wraps BlockNote's UI primitives)
 - Lucide React (icons)
@@ -64,7 +65,7 @@ tracker/
 │   ├── index.css
 │   ├── types.ts              # Page interface
 │   ├── store/
-│   │   ├── pages.ts          # usePageStore (persisted to "notion-clone-pages")
+│   │   ├── pages.ts          # usePageStore (persisted through src/lib/db.ts)
 │   │   └── settings.ts       # useSettingsStore (persisted to "notion-clone-settings")
 │   ├── components/
 │   │   ├── Sidebar.tsx       # Navigation, favorites, trash, resize handle

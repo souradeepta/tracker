@@ -78,6 +78,11 @@ describe("pages store — trashPage / restorePage / permanentDelete", () => {
     expect(page.deletedAt).toBeNull();
   });
 
+  it("ignores restore requests for unknown pages", () => {
+    usePageStore.getState().restorePage("missing-page");
+    expect(usePageStore.getState().pages).toEqual({});
+  });
+
   it("permanently deletes a page and all its descendants", () => {
     const parentId = usePageStore.getState().createPage();
     const childId = usePageStore.getState().createPage(parentId);

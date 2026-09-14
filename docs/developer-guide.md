@@ -14,7 +14,7 @@ Comprehensive onboarding and reference for contributors to the Notion-clone web 
 6. [Templates System](#templates-system)
 7. [BlockNote Integration](#blocknote-integration)
 8. [Dark Mode — End to End](#dark-mode--end-to-end)
-9. [localStorage Persistence](#localstorage-persistence)
+9. [Browser Storage Persistence](#browser-storage-persistence)
 10. [Testing Reference](#testing-reference)
 11. [TDD Workflow — Worked Example](#tdd-workflow--worked-example)
 12. [Adding a New Feature — End to End](#adding-a-new-feature--end-to-end)
@@ -30,7 +30,7 @@ Comprehensive onboarding and reference for contributors to the Notion-clone web 
 |---|---|---|---|
 | Node.js | 18 LTS | 20 LTS or later | Vite 8 requires Node 18+. Use `nvm` or `fnm` to manage versions. |
 | npm | 9 | Bundled with Node 20 | No `yarn` or `pnpm` equivalents tested. |
-| Chrome | 115 | Latest | Primary development browser; DevTools used for localStorage inspection. |
+| Chrome | 115 | Latest | Primary development browser; DevTools used for IndexedDB inspection. |
 | Firefox | 117 | Latest | Secondary supported browser. |
 | Safari | 17 | Latest | Supported; test dark mode and focus behaviour. |
 | Git | 2.x | Latest | Standard Git workflow. |
@@ -146,7 +146,7 @@ tracker/
 The single source of truth for the data shape. Every store action, component prop, and test fixture must conform to the `Page` and `Template` interfaces defined here. Any data model change must start in this file.
 
 **`src/store/pages.ts`**
-The largest and most important file. Contains the `usePageStore` Zustand store with all page-related state and every action. The `newPage()` helper function ensures every created page receives the full set of default field values. The `persist` middleware is configured with `partialize` to serialize only the data fields (not the action functions) to localStorage.
+The largest and most important file. Contains the `usePageStore` Zustand store with all page-related state and every action. The `newPage()` helper function ensures every created page receives the full set of default field values. Page records are persisted through Dexie in `src/lib/db.ts`; state updates are immediate and database writes are best-effort.
 
 **`src/store/settings.ts`**
 Holds the two display-layer preferences: dark mode and sidebar dimensions. The `toggleDark` action mutates `document.documentElement.classList` as a synchronous side effect inside the Zustand `set` call.
@@ -258,8 +258,8 @@ interface PageStore {
 }
 ```
 
-**localStorage key:** `notion-clone-pages`  
-**Partialised fields:** `pages`, `activePageId`, `expandedIds`, `recentPageIds`
+**IndexedDB database:** `tracker-db`
+**Tables:** `pages` (page records) and `nav` (active page, expanded ids, recent ids)
 
 ---
 
@@ -794,7 +794,9 @@ className="bg-[#f7f7f5] dark:bg-neutral-900 border-gray-200 dark:border-neutral-
 
 ---
 
-## localStorage Persistence
+## Browser Storage Persistence
+
+Page content and navigation state use IndexedDB through Dexie (`tracker-db`). The settings store continues to use localStorage for small display preferences. The legacy `notion-clone-pages` localStorage payload is migrated into IndexedDB on startup when valid.
 
 ### How Zustand persist works
 
