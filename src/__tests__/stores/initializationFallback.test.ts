@@ -30,4 +30,13 @@ describe("IndexedDB initialization fallback", () => {
     expect(Object.values(pages)).toHaveLength(1);
     expect(Object.values(pages)[0].title).toBe("Getting Started");
   });
+
+  it("shares concurrent initialization calls", async () => {
+    const first = usePageStore.getState().initializeIfEmpty();
+    const second = usePageStore.getState().initializeIfEmpty();
+
+    expect(second).toBe(first);
+    await first;
+    expect(Object.values(usePageStore.getState().pages)).toHaveLength(1);
+  });
 });
