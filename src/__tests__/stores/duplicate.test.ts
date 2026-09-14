@@ -29,6 +29,14 @@ describe("duplicatePage", () => {
     expect(usePageStore.getState().pages[cloneId].parentId).toBe(parentId);
   });
 
+  it("auto-expands the parent when duplicating a child", () => {
+    const parentId = usePageStore.getState().createPage();
+    const childId = usePageStore.getState().createPage(parentId);
+    usePageStore.getState().toggleExpand(parentId);
+    usePageStore.getState().duplicatePage(childId);
+    expect(usePageStore.getState().expandedIds).toContain(parentId);
+  });
+
   it("does not copy the favorited flag", () => {
     const id = usePageStore.getState().createPage();
     usePageStore.getState().toggleFavorite(id);
