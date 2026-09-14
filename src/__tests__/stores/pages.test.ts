@@ -20,6 +20,12 @@ describe("pages store — createPage", () => {
     expect(page.icon).toBeTruthy();
   });
 
+  it("always generates a unique id instead of accepting an override id", () => {
+    const id = usePageStore.getState().createPage(null, { id: "caller-supplied-id" });
+    expect(id).not.toBe("caller-supplied-id");
+    expect(usePageStore.getState().pages["caller-supplied-id"]).toBeUndefined();
+  });
+
   it("sets the new page as active", () => {
     const id = usePageStore.getState().createPage();
     expect(usePageStore.getState().activePageId).toBe(id);

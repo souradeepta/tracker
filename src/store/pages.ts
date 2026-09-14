@@ -123,7 +123,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   loaded: false,
 
   createPage: (parentId = null, overrides = {}) => {
-    const page = newPage({ ...overrides, parentId: parentId ?? null });
+    const page = newPage({ ...overrides, id: uuidv4(), parentId: parentId ?? null });
     set((state) => ({
       pages: { ...state.pages, [page.id]: page },
       activePageId: page.id,
