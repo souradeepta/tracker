@@ -208,7 +208,9 @@ export const usePageStore = create<PageStore>()((set, get) => ({
     set((state) => {
       const newPages = { ...state.pages };
       toDelete.forEach((pid) => delete newPages[pid]);
-      const newActive = state.activePageId && toDelete.includes(state.activePageId) ? (Object.keys(newPages)[0] ?? null) : state.activePageId;
+      const newActive = state.activePageId && toDelete.includes(state.activePageId)
+        ? (Object.values(newPages).find((page) => !page.deleted)?.id ?? null)
+        : state.activePageId;
       return { pages: newPages, activePageId: newActive };
     });
     db.pages.bulkDelete(toDelete).catch(() => {});
@@ -217,7 +219,13 @@ export const usePageStore = create<PageStore>()((set, get) => ({
 
   emptyTrash: () => {
     const trashedIds = Object.values(get().pages).filter((p) => p.deleted).map((p) => p.id);
-    set((state) => ({ pages: Object.fromEntries(Object.entries(state.pages).filter(([, p]) => !p.deleted)) }));
+    set((state) => {
+      const pages = Object.fromEntries(Object.entries(state.pages).filter(([, p]) => !p.deleted));
+      const activePageId = state.activePageId && pages[state.activePageId]
+        ? state.activePageId
+        : (Object.keys(pages)[0] ?? null);
+      return { pages, activePageId };
+    });
     db.pages.bulkDelete(trashedIds).catch(() => {});
     saveNav(get());
   },

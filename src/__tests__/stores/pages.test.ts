@@ -105,6 +105,15 @@ describe("pages store — trashPage / restorePage / permanentDelete", () => {
     expect(state[grandchildId]).toBeUndefined();
   });
 
+  it("does not select a trashed page after deleting the active page", () => {
+    const activeId = usePageStore.getState().createPage();
+    const trashedId = usePageStore.getState().createPage();
+    usePageStore.getState().trashPage(trashedId);
+    usePageStore.getState().setActive(activeId);
+    usePageStore.getState().permanentDelete(activeId);
+    expect(usePageStore.getState().activePageId).toBeNull();
+  });
+
   it("emptyTrash removes all deleted pages", () => {
     const id1 = usePageStore.getState().createPage();
     const id2 = usePageStore.getState().createPage();
@@ -113,6 +122,14 @@ describe("pages store — trashPage / restorePage / permanentDelete", () => {
     const state = usePageStore.getState().pages;
     expect(state[id1]).toBeUndefined();
     expect(state[id2]).toBeDefined();
+  });
+
+  it("clears an active id that points to a trashed page", () => {
+    const id = usePageStore.getState().createPage();
+    usePageStore.getState().trashPage(id);
+    usePageStore.setState({ activePageId: id });
+    usePageStore.getState().emptyTrash();
+    expect(usePageStore.getState().activePageId).toBeNull();
   });
 });
 
