@@ -285,6 +285,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   },
 
   setActive: (id) => {
+    if (id !== null && !get().pages[id]) return;
     set((state) => ({
       activePageId: id,
       recentPageIds: id ? [id, ...state.recentPageIds.filter((r) => r !== id)].slice(0, MAX_RECENTS) : state.recentPageIds,
@@ -293,6 +294,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   },
 
   toggleExpand: (id) => {
+    if (!get().pages[id]) return;
     set((state) => ({
       expandedIds: state.expandedIds.includes(id) ? state.expandedIds.filter((eid) => eid !== id) : [...state.expandedIds, id],
     }));

@@ -136,6 +136,13 @@ describe("pages store — toggleExpand", () => {
     expect(usePageStore.getState().expandedIds).toContain(id);
   });
 
+  it("ignores unknown page ids", () => {
+    usePageStore.getState().toggleExpand("missing-page");
+    usePageStore.getState().setActive("missing-page");
+    expect(usePageStore.getState().expandedIds).toEqual([]);
+    expect(usePageStore.getState().activePageId).toBeNull();
+  });
+
   it("collapses an expanded page", () => {
     const id = usePageStore.getState().createPage();
     usePageStore.getState().toggleExpand(id);
