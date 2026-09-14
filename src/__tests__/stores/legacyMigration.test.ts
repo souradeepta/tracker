@@ -88,4 +88,20 @@ describe("legacy page migration", () => {
     expect(usePageStore.getState().loaded).toBe(true);
     expect(Object.values(usePageStore.getState().pages)).toHaveLength(1);
   });
+
+  it("fills defaults for legacy records missing newer fields", async () => {
+    const legacyPage = { id: page.id, title: "Older page", content: [] };
+    mocks.pagesToArray.mockResolvedValue([legacyPage]);
+    mocks.navGet.mockResolvedValue({ key: "state", activePageId: page.id, expandedIds: [], recentPageIds: [] });
+
+    localStorage.setItem("notion-clone-pages", JSON.stringify({ state: { pages: { [page.id]: legacyPage } } }));
+    await usePageStore.getState().initializeIfEmpty();
+
+    const migrated = usePageStore.getState().pages[page.id];
+    expect(migrated.description).toBe("");
+    expect(migrated.tags).toEqual([]);
+    expect(migrated.locked).toBe(false);
+    expect(migrated.status).toBe("none");
+    expect(migrated.priority).toBe("none");
+  });
 });

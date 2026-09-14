@@ -66,6 +66,28 @@ function newPage(overrides?: Partial<Page>): Page {
   };
 }
 
+function normalizePage(page: Partial<Page> & Pick<Page, "id">): Page {
+  const defaults = newPage({ id: page.id });
+  return {
+    ...defaults,
+    ...page,
+    content: page.content ?? [],
+    parentId: page.parentId ?? null,
+    icon: page.icon ?? defaults.icon,
+    cover: page.cover ?? null,
+    favorited: page.favorited ?? false,
+    deleted: page.deleted ?? false,
+    deletedAt: page.deletedAt ?? null,
+    locked: page.locked ?? false,
+    description: page.description ?? "",
+    tags: page.tags ?? [],
+    status: page.status ?? "none",
+    priority: page.priority ?? "none",
+    createdAt: page.createdAt ?? defaults.createdAt,
+    updatedAt: page.updatedAt ?? defaults.updatedAt,
+  };
+}
+
 function saveNav(state: { activePageId: string | null; expandedIds: string[]; recentPageIds: string[] }) {
   db.nav.put({ key: "state", activePageId: state.activePageId, expandedIds: state.expandedIds, recentPageIds: state.recentPageIds })
     .catch(() => {/* ignore write errors */});
@@ -312,8 +334,10 @@ export const usePageStore = create<PageStore>()((set, get) => ({
       if (oldRaw) {
         let migrated = false;
         try {
-          const old = JSON.parse(oldRaw) as { state?: { pages?: Record<string, Page>; activePageId?: string | null; expandedIds?: string[]; recentPageIds?: string[] } };
-          const oldPages = Object.values(old?.state?.pages ?? {});
+          const old = JSON.parse(oldRaw) as { state?: { pages?: Record<string, Partial<Page>>; activePageId?: string | null; expandedIds?: string[]; recentPageIds?: string[] } };
+          const oldPages = Object.values(old?.state?.pages ?? {})
+            .filter((page): page is Partial<Page> & { id: string } => typeof page?.id === "string")
+            .map(normalizePage);
           if (oldPages.length > 0) {
             await db.pages.bulkPut(oldPages);
             await db.nav.put({
@@ -331,7 +355,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
       const [allPages, navState] = await Promise.all([db.pages.toArray(), db.nav.get("state")]);
 
       if (allPages.length > 0) {
-        const pagesRecord = Object.fromEntries(allPages.map((p) => [p.id, p]));
+        const pagesRecord = Object.fromEntries(allPages.map((p) => [p.id, normalizePage(p)]));
         set({
           pages: pagesRecord,
           activePageId: navState?.activePageId ?? null,
