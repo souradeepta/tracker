@@ -21,6 +21,8 @@
 
 ## Recent pushed commits
 
+- `daed2ed` — refresh handoff commit reference.
+- `0aa9236` — refresh handoff metadata after the previous push.
 - `40d60d6` — document handoff/memory state and harden page IDs.
 - `2ccc595` — ignore stale navigation page IDs.
 - `6dfcaa7` — normalize legacy page records.
