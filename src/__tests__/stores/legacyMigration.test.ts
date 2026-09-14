@@ -76,4 +76,16 @@ describe("legacy page migration", () => {
     expect(usePageStore.getState().activePageId).toBe(page.id);
     expect(localStorage.getItem("notion-clone-pages")).toBeNull();
   });
+
+  it("preserves malformed legacy data instead of deleting it", async () => {
+    mocks.pagesToArray.mockResolvedValue([]);
+    mocks.navGet.mockResolvedValue(undefined);
+    localStorage.setItem("notion-clone-pages", "not valid JSON");
+
+    await usePageStore.getState().initializeIfEmpty();
+
+    expect(localStorage.getItem("notion-clone-pages")).toBe("not valid JSON");
+    expect(usePageStore.getState().loaded).toBe(true);
+    expect(Object.values(usePageStore.getState().pages)).toHaveLength(1);
+  });
 });
