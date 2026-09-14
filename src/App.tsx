@@ -91,9 +91,9 @@ export default function App() {
         <Box style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw", overflow: "hidden", background: "var(--surface)" }}>
           <FocusModeBar onExport={handleExport} />
           <Box style={{ flex: 1, overflow: "hidden", paddingTop: 41 }}>
-            <Editor {...editorProps} />
+            <Editor key={activePageId ?? "home"} {...editorProps} />
           </Box>
-          <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+          <SearchModal key={searchOpen ? "open" : "closed"} open={searchOpen} onClose={() => setSearchOpen(false)} />
           <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
         </Box>
       </MantineProvider>
@@ -200,10 +200,10 @@ export default function App() {
           </Group>
 
           {/* Content */}
-          {viewMode === "notes" ? <Editor {...editorProps} /> : <KanbanBoard />}
+          {viewMode === "notes" ? <Editor key={activePageId ?? "home"} {...editorProps} /> : <KanbanBoard />}
         </Paper>
 
-        <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+        <SearchModal key={searchOpen ? "open" : "closed"} open={searchOpen} onClose={() => setSearchOpen(false)} />
         <TemplatesModal open={templatesOpen} onClose={() => setTemplatesOpen(false)} />
         <TagBrowser open={tagBrowserOpen} onClose={() => setTagBrowserOpen(false)} />
         <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />

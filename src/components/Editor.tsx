@@ -250,11 +250,6 @@ export function Editor({ onNew, onSearch, onTemplates }: EditorProps) {
   );
 
   useEffect(() => {
-    setLocalTitle(activePage?.title ?? "");
-    setLocalDescription(activePage?.description ?? "");
-  }, [activePageId]);
-
-  useEffect(() => {
     if (titleRef.current) {
       titleRef.current.style.height = "auto";
       titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;

@@ -18,11 +18,10 @@ function extractHeadings(editor: BlockNoteEditor): Heading[] {
 }
 
 export function TableOfContents({ editor }: { editor: BlockNoteEditor }) {
-  const [headings, setHeadings] = useState<Heading[]>([]);
+  const [headings, setHeadings] = useState<Heading[]>(() => extractHeadings(editor));
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
-    setHeadings(extractHeadings(editor));
     return editor.onChange(() => setHeadings(extractHeadings(editor)));
   }, [editor]);
 

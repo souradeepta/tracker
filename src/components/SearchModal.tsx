@@ -19,14 +19,8 @@ export function SearchModal({ open, onClose }: Props) {
     : recentPageIds.map((id) => pages[id]).filter((p) => p && !p.deleted).slice(0, 8);
 
   useEffect(() => {
-    if (open) {
-      setQuery("");
-      setCursor(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    if (open) setTimeout(() => inputRef.current?.focus(), 50);
   }, [open]);
-
-  useEffect(() => setCursor(0), [query]);
 
   const choose = (id: string) => { setActive(id); onClose(); };
 
@@ -62,7 +56,7 @@ export function SearchModal({ open, onClose }: Props) {
           <input
             ref={inputRef}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setCursor(0); }}
             onKeyDown={handleKey}
             placeholder="Search pages, tags…"
             style={{
