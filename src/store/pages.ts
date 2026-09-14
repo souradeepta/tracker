@@ -342,7 +342,16 @@ export const usePageStore = create<PageStore>()((set, get) => ({
       { type: "bulletListItem", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Add a ", styles: {} }, { type: "text", text: "cover image", styles: { bold: true } }, { type: "text", text: " — hover above the page title.", styles: {} }], children: [] },
       { type: "paragraph", props: { textAlignment: "left", textColor: "default", backgroundColor: "default" }, content: [{ type: "text", text: "Feel free to delete this page whenever you're ready. Happy writing! ✨", styles: { italic: true } }], children: [] },
       ] as Parameters<typeof updateContent>[1]);
-    })().finally(() => {
+    })().catch(() => {
+      // A browser may expose IndexedDB while still denying database access
+      // (private mode, disabled storage, or a quota/security policy). Keep the
+      // editor usable with in-memory state instead of leaving App on loading.
+      if (Object.keys(get().pages).length === 0) {
+        const { createPage } = get();
+        createPage(null, { title: "Getting Started", icon: "🚀" });
+      }
+      set({ loaded: true });
+    }).finally(() => {
       initializationPromise = null;
     });
 
