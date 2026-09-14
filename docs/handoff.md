@@ -6,20 +6,19 @@ Updated 2026-09-14.
 
 Tracker stores page records and navigation state in IndexedDB through Dexie (`tracker-db`). UI preferences remain in localStorage. Startup supports legacy `notion-clone-pages` migration, malformed-data preservation, missing-field normalization, concurrent initialization, and an in-memory fallback when IndexedDB is unavailable.
 
-The latest pushed commit is `2ccc595` (`Ignore stale navigation page ids`). The worktree also contains an uncommitted follow-up that forces `createPage()` to generate its own UUID even when callers provide an `id` override, with a regression test.
+The latest pushed commit is `40d60d6` (`Document persistence handoff and harden page ids`). The worktree is clean. It includes the UUID hardening for `createPage()` and the handoff/memory documentation.
 
 ## Verification
 
 - 87 tests pass.
 - ESLint passes.
-- The production build was running when this handoff was written; rerun `npm run build` before release.
+- The production build passes; Vite still reports the existing large-chunk warning.
 - `git diff --check` should be run before committing.
 
 ## Recommended next steps
 
-1. Finish verifying and commit the pending `createPage()` ID-hardening change.
-2. Push the commit after the full test, lint, and build checks pass.
-3. Keep the IndexedDB migration tests in `src/__tests__/stores/` aligned with any schema changes.
+1. Keep the IndexedDB migration tests in `src/__tests__/stores/` aligned with any schema changes.
+2. Consider adding a real-browser or fake-IndexedDB integration test suite when the test environment supports it.
 
 ## Useful commands
 

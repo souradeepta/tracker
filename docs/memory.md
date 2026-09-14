@@ -21,6 +21,7 @@
 
 ## Recent pushed commits
 
+- `40d60d6` — document handoff/memory state and harden page IDs.
 - `2ccc595` — ignore stale navigation page IDs.
 - `6dfcaa7` — normalize legacy page records.
 - `8fca8d7` — ignore updates for missing pages.
