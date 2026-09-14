@@ -104,7 +104,7 @@ function Column({ status, pages, onAdd }: { status: PageStatus; pages: Page[]; o
 
 export function KanbanBoard() {
   const { pages, createPage, setStatus } = usePageStore();
-  const [_filterOpen, setFilterOpen] = useState(false);
+  const [, setFilterOpen] = useState(false);
   const livePages = Object.values(pages).filter((p) => !p.deleted);
   const columns = groupPagesByStatus(livePages);
 

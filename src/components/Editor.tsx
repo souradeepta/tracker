@@ -232,7 +232,7 @@ interface EditorProps {
   onShortcuts?: () => void;
 }
 
-export function Editor({ onExport: _onExport, onNew, onSearch, onTemplates }: EditorProps) {
+export function Editor({ onNew, onSearch, onTemplates }: EditorProps) {
   const { pages, activePageId, recentPageIds, updateTitle, updateDescription, updateContent } = usePageStore();
   const { dark } = useSettingsStore();
   const activePage = activePageId ? pages[activePageId] : null;
