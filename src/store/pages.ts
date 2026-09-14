@@ -201,36 +201,43 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   },
 
   updateTitle: (id, title) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], title, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   updateDescription: (id, description) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], description, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   updateIcon: (id, icon) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], icon, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   updateCover: (id, cover) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], cover, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   updateContent: (id, content) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], content, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   toggleLocked: (id) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], locked: !state.pages[id].locked, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   addTag: (id, tag) => {
+    if (!get().pages[id]) return;
     const existing = get().pages[id]?.tags ?? [];
     if (existing.includes(tag)) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], tags: [...existing, tag], updatedAt: Date.now() } } }));
@@ -238,16 +245,19 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   },
 
   removeTag: (id, tag) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], tags: state.pages[id].tags.filter((t) => t !== tag), updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   setStatus: (id, status) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], status, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
 
   setPriority: (id, priority) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], priority, updatedAt: Date.now() } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },
@@ -268,6 +278,7 @@ export const usePageStore = create<PageStore>()((set, get) => ({
   },
 
   toggleFavorite: (id) => {
+    if (!get().pages[id]) return;
     set((state) => ({ pages: { ...state.pages, [id]: { ...state.pages[id], favorited: !state.pages[id].favorited } } }));
     db.pages.put(get().pages[id]).catch(() => {});
   },

@@ -50,6 +50,11 @@ describe("pages store — updateTitle", () => {
     expect(page.title).toBe("My New Title");
     expect(page.updatedAt).toBeGreaterThanOrEqual(before);
   });
+
+  it("ignores updates for unknown pages", () => {
+    usePageStore.getState().updateTitle("missing-page", "Should not exist");
+    expect(usePageStore.getState().pages).toEqual({});
+  });
 });
 
 describe("pages store — trashPage / restorePage / permanentDelete", () => {
