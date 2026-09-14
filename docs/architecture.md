@@ -414,7 +414,7 @@ const handleEditorChange = useCallback(() => {
 }, [activePageId, activePage?.locked, editor, updateContent]);
 ```
 
-`editor.onChange(callback)` registers a callback that fires whenever the editor's internal Prosemirror state changes — including cursor moves, selections, and formatting changes, not just text content changes. The 500 ms debounce ensures that `updateContent` (which triggers a localStorage write) is not called on every keystroke.
+`editor.onChange(callback)` registers a callback that fires whenever the editor's internal Prosemirror state changes — including cursor moves, selections, and formatting changes, not just text content changes. The 500 ms debounce ensures that `updateContent` (which triggers an IndexedDB write) is not called on every keystroke.
 
 `editor.document` is BlockNote's current document snapshot, typed as `Block[]`. The cast to `PartialBlock[]` is safe because `Block` extends `PartialBlock` — the `PartialBlock` type is the generic, write-anywhere form while `Block` is the fully resolved form with guaranteed fields.
 
@@ -434,7 +434,7 @@ BlockNote's `PartialBlock` is a JSON-serialisable tree. A heading block looks li
 }
 ```
 
-This JSON is stored inside `pages[id].content` in the Zustand store, which is itself serialised to localStorage. The entire content array is stored verbatim — no compression, no diff-based storage.
+This JSON is stored inside `pages[id].content` in the Zustand store and written verbatim to the Dexie `pages` table — no compression, no diff-based storage.
 
 ### MantineProvider requirement
 
@@ -545,7 +545,7 @@ The `Math.min` clamps ensure the menu stays within the viewport even when right-
 - Hard delete: immediately remove from the map.
 - A separate `trash: Record<string, Page>` store alongside `pages`.
 
-**Reason chosen:** Recoverable trash is a core UX requirement. Keeping deleted pages in the same map avoids the complexity of moving records between two maps and keeping the maps consistent. The downside (space usage) is acceptable given the localStorage limits and the expectation that users periodically empty the trash.
+**Reason chosen:** Recoverable trash is a core UX requirement. Keeping deleted pages in the same map avoids the complexity of moving records between two maps and keeping the maps consistent. The downside (space usage) is acceptable given browser storage quotas and the expectation that users periodically empty the trash.
 
 ---
 
@@ -655,7 +655,7 @@ For the typical workspace, these re-renders are inexpensive and not a bottleneck
 | Title (`updateTitle`) | 300 ms | Short burst inputs; 300 ms catches natural pauses between words |
 | Content (`updateContent`) | 500 ms | Block-level changes are more expensive to serialise; 500 ms balances durability vs. write frequency |
 
-With 500 ms debouncing, `localStorage.setItem` is called at most twice per second during active typing. Each call serialises the entire `pages` object via `JSON.stringify`.
+With 500 ms debouncing, the changed page is written to IndexedDB at most twice per second during active typing. Each write serialises the page record via Dexie.
 
 ### When the editor re-mounts
 
@@ -679,11 +679,11 @@ The Markdown export function (`blocksToMarkdown`) produces a string that is plac
 
 **Residual risk:** Image blocks allow embedding arbitrary URLs. If an attacker tricks a user into inserting an image URL that points to a tracking pixel or a URL that causes side-channel information disclosure, that could be a concern. However, since the app is single-user and local-only, the attack surface is extremely limited.
 
-### localStorage data exposure
+### Browser database data exposure
 
-All workspace data is stored in `localStorage["notion-clone-pages"]`. Any JavaScript running on the same origin (same protocol + domain + port) can read this data via `localStorage.getItem("notion-clone-pages")`. Since the app is typically served from `localhost:5173` or a dedicated static domain, other tabs on different origins cannot access it.
+Workspace data is stored in the browser's IndexedDB `tracker-db` database. Any JavaScript running on the same origin can access the database through IndexedDB APIs. Since the app is typically served from `localhost:5173` or a dedicated static domain, other tabs on different origins cannot access it.
 
-**Residual risk:** If the app is embedded in a page that also loads malicious scripts on the same origin, those scripts could exfiltrate all page content from localStorage. This is a theoretical risk for a self-hosted deployment on a shared domain.
+**Residual risk:** If the app is embedded in a page that also loads malicious scripts on the same origin, those scripts could exfiltrate all page content from IndexedDB. This is a theoretical risk for a self-hosted deployment on a shared domain.
 
 ### Data loss scenarios
 

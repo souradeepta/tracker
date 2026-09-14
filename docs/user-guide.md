@@ -825,19 +825,19 @@ Yes, but the parent must also be restored separately. Restoring a child page whi
 Two conditions must both be met: (1) the page must have at least one heading block (H1/H2/H3) with non-empty text, and (2) your screen must be at least 1280 px wide (the Tailwind `xl` breakpoint). On a laptop at 1200 px or less, the TOC is hidden.
 
 **Q: I accidentally emptied the trash. Can I recover my pages?**
-No. "Empty trash" performs an immediate permanent delete with no undo. The pages are removed from localStorage and cannot be recovered. Always restore any pages you might want before clicking Empty trash.
+No. "Empty trash" performs an immediate permanent delete with no undo. The pages are removed from IndexedDB and cannot be recovered. Always restore any pages you might want before clicking Empty trash.
 
 **Q: Why does the word count show 0 for a page with text?**
 The word counter only counts text tokens from the inline content arrays of blocks. Certain block types — images, dividers, and tables without text in cells — contribute 0 words even when they contain information. Also, if a page was just opened and no edits have been made yet, the counter initializes from the stored content, which may behave unexpectedly for certain block structures.
 
 **Q: How much data can I store?**
-Each browser gives localhost/origin roughly 5–10 MB of localStorage space. For text-only pages this is very generous — you can store thousands of pages. If you embed many image URLs (the URL string is stored, not the image itself) or write extremely long pages, you could theoretically approach the limit. There is no storage usage indicator in the current UI.
+IndexedDB provides substantially more capacity than localStorage, though the available quota still varies by browser and device. If you embed many image URLs (the URL string is stored, not the image itself) or write extremely long pages, you could theoretically approach the limit. There is no storage usage indicator in the current UI.
 
 **Q: Can I use the app offline?**
-Yes. After the initial page load, the app runs entirely in your browser with no network calls. You can disconnect from the internet and continue writing. The next time you connect and reload, nothing is lost — data is in localStorage, not the network.
+Yes. After the initial page load, the app runs entirely in your browser with no network calls. You can disconnect from the internet and continue writing. The next time you connect and reload, nothing is lost — data is in IndexedDB, not the network.
 
 **Q: What browser is required?**
-Chrome 115 or later, Firefox 117 or later, or Safari 17 or later. Any Chromium-based browser (Edge, Brave, Arc, etc.) at an equivalent version also works. JavaScript and localStorage must be enabled — the app does not function with JavaScript disabled.
+Chrome 115 or later, Firefox 117 or later, or Safari 17 or later. Any Chromium-based browser (Edge, Brave, Arc, etc.) at an equivalent version also works. JavaScript and browser storage must be enabled — the app does not function with JavaScript disabled.
 
 **Q: Does locking a page prevent it from being trashed?**
 No. A locked page can still be trashed from the context menu. Locking only prevents editing the content and title within the editor UI.

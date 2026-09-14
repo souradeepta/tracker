@@ -798,7 +798,9 @@ className="bg-[#f7f7f5] dark:bg-neutral-900 border-gray-200 dark:border-neutral-
 
 Page content and navigation state use IndexedDB through Dexie (`tracker-db`). The settings store continues to use localStorage for small display preferences. The legacy `notion-clone-pages` localStorage payload is migrated into IndexedDB on startup when valid.
 
-### How Zustand persist works
+### Legacy localStorage migration (historical)
+
+The following examples document the pre-Dexie storage format only. They are retained to explain migration of existing `notion-clone-pages` data; current page reads and writes use IndexedDB through Dexie as described above.
 
 Both stores are wrapped with `persist(factory, options)`:
 
