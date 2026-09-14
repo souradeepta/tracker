@@ -10,22 +10,16 @@ interface Props {
   onExport: (id: string) => void;
 }
 
-export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
-  const { pages, toggleFavorite, toggleLocked, trashPage, duplicatePage, setActive } = usePageStore();
-  const page = pages[pageId];
-  const ref  = useRef<HTMLDivElement>(null);
+interface MenuItemProps {
+  icon: React.ReactNode;
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+  onClose: () => void;
+}
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [onClose]);
-
-  if (!page) return null;
-
-  const Item = ({ icon, label, danger, onClick }: { icon: React.ReactNode; label: string; danger?: boolean; onClick: () => void }) => (
+function MenuItem({ icon, label, danger, onClick, onClose }: MenuItemProps) {
+  return (
     <button
       onClick={() => { onClick(); onClose(); }}
       style={{
@@ -50,6 +44,22 @@ export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
       {label}
     </button>
   );
+}
+
+export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
+  const { pages, toggleFavorite, toggleLocked, trashPage, duplicatePage, setActive } = usePageStore();
+  const page = pages[pageId];
+  const ref  = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [onClose]);
+
+  if (!page) return null;
 
   return (
     <div
@@ -67,17 +77,18 @@ export function ContextMenu({ pageId, x, y, onClose, onExport }: Props) {
         width: 196,
       }}
     >
-      <Item icon={<ExternalLink size={13} />} label="Open" onClick={() => setActive(pageId)} />
-      <Item icon={<Copy size={13} />} label="Duplicate" onClick={() => duplicatePage(pageId)} />
-      <Item
+      <MenuItem onClose={onClose} icon={<ExternalLink size={13} />} label="Open" onClick={() => setActive(pageId)} />
+      <MenuItem onClose={onClose} icon={<Copy size={13} />} label="Duplicate" onClick={() => duplicatePage(pageId)} />
+      <MenuItem
+        onClose={onClose}
         icon={<Star size={13} fill={page.favorited ? "currentColor" : "none"} />}
         label={page.favorited ? "Unfavorite" : "Add to favorites"}
         onClick={() => toggleFavorite(pageId)}
       />
-      <Item icon={<Lock size={13} />} label={page.locked ? "Unlock page" : "Lock page"} onClick={() => toggleLocked(pageId)} />
-      <Item icon={<Download size={13} />} label="Export as Markdown" onClick={() => onExport(pageId)} />
+      <MenuItem onClose={onClose} icon={<Lock size={13} />} label={page.locked ? "Unlock page" : "Lock page"} onClick={() => toggleLocked(pageId)} />
+      <MenuItem onClose={onClose} icon={<Download size={13} />} label="Export as Markdown" onClick={() => onExport(pageId)} />
       <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0" }} />
-      <Item icon={<Trash2 size={13} />} label="Move to trash" danger onClick={() => trashPage(pageId)} />
+      <MenuItem onClose={onClose} icon={<Trash2 size={13} />} label="Move to trash" danger onClick={() => trashPage(pageId)} />
     </div>
   );
 }
