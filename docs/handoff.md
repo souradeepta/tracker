@@ -6,7 +6,7 @@ Updated 2026-09-14.
 
 Tracker stores page records and navigation state in IndexedDB through Dexie (`tracker-db`). UI preferences remain in localStorage. Startup supports legacy `notion-clone-pages` migration, malformed-data preservation, missing-field normalization, concurrent initialization, and an in-memory fallback when IndexedDB is unavailable.
 
-The latest pushed commit is `40d60d6` (`Document persistence handoff and harden page ids`). The worktree is clean. It includes the UUID hardening for `createPage()` and the handoff/memory documentation.
+The latest pushed commit is `0aa9236` (`Refresh handoff after latest push`). The worktree is clean. It includes the current handoff metadata; the preceding `40d60d6` commit added the UUID hardening and initial handoff/memory documentation.
 
 ## Verification
 
