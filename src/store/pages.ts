@@ -136,6 +136,9 @@ export const usePageStore = create<PageStore>()((set, get) => ({
       pages: { ...state.pages, [page.id]: page },
       activePageId: page.id,
       recentPageIds: [page.id, ...state.recentPageIds].slice(0, MAX_RECENTS),
+      expandedIds: parentId && !state.expandedIds.includes(parentId)
+        ? [...state.expandedIds, parentId]
+        : state.expandedIds,
     }));
     db.pages.put(page).catch(() => {});
     saveNav(get());

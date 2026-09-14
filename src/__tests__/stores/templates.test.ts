@@ -58,6 +58,12 @@ describe("createFromTemplate store action", () => {
     expect(usePageStore.getState().activePageId).toBe(id);
   });
 
+  it("auto-expands the parent for a templated child page", () => {
+    const parentId = usePageStore.getState().createPage();
+    usePageStore.getState().createFromTemplate("meeting", parentId);
+    expect(usePageStore.getState().expandedIds).toContain(parentId);
+  });
+
   it("returns null-like for unknown template key and creates a blank page", () => {
     const id = usePageStore.getState().createFromTemplate("unknown-key-xyz");
     expect(usePageStore.getState().pages[id]).toBeDefined();
